@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"name": "3658BaseTalonFXSwerve",
+			"path": "../3658BaseTalonFXSwerve/3658BaseTalonFXSwerve"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"java.configuration.updateBuildConfiguration": "automatic",
+		"java.server.launchMode": "Standard"
+	}
+}
