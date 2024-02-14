@@ -11,53 +11,69 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+//import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.Swerve;
 
 public class RobotContainer {
-  private double MaxSpeed = TunerConstants.kSpeedAt12VoltsMps; // kSpeedAt12VoltsMps desired top speed
-  private double MaxAngularRate = 1.5 * Math.PI; // 3/4 of a rotation per second max angular velocity
+	/* CONSTANTS (prefix: c) */
+    private double c_MaxSwerveSpeed = TunerConstants.kSpeedAt12VoltsMps; // kSpeedAt12VoltsMps desired top speed
+  	private double c_MaxSwerveAngularRate = 1.5 * Math.PI; // 3/4 of a rotation per second max angular velocity
 
-  /* Setting up bindings for necessary control of the swerve drive platform */
-  private final CommandXboxController joystick = new CommandXboxController(0); // My joystick
-  private final CommandSwerveDrivetrain drivetrain = TunerConstants.DriveTrain; // My drivetrain
+	/* SUBSYSTEM DEFINITIONS (prefix: s) */
+	private final Swerve s_Swerve = TunerConstants.DriveTrain;
 
-  private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-      .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
-      .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // I want field-centric
+	/* INPUT DEVICES (prefix: xb) */
+	private final Joystick xb_Driver = new Joystick(0);
+
+	/* CONTROL AXES (prefix: axis) */
+	private final double axis_Forward = XboxController.Axis.kLeftY.value;
+	private final double axis_Strafe  = XboxController.Axis.kLeftX.value;
+	private final double axis_Rotate  = XboxController.Axis.kRightX.value;	
+
+	/* CONTROL BUTTONS (prefix: ctrl) */
+	private final JoystickButton ctrl_Brake 		= new JoystickButton(xb_Driver, XboxController.Button.kB.value);
+	private final JoystickButton ctrl_Aim		   	= new JoystickButton(xb_Driver, XboxController.Button.kY.value);
+	private final JoystickButton ctrl_ResetHeading	= new JoystickButton(xb_Driver, XboxController.Button.kLeftBumper.value);
+
+  	private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+      	.withDeadband(c_MaxSwerveSpeed * 0.1).withRotationalDeadband(c_MaxSwerveAngularRate * 0.1) // Add a 10% deadband
+      	.withDriveRequestType(DriveRequestType.OpenLoopVoltage); // I want field-centric
                                                                // driving in open loop
-  private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-  private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
-  private final Telemetry logger = new Telemetry(MaxSpeed);
+  	private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
+  	private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
+  	private final Telemetry logger = new Telemetry(c_MaxSwerveSpeed);
 
-  private void configureBindings() {
-    drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
-        drivetrain.applyRequest(() -> drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with
-                                                                                           // negative Y (forward)
-            .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-            .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+  	private void configureBindings() {
+    	s_Swerve.setDefaultCommand( // Drivetrain will execute this command periodically
+        	s_Swerve.applyRequest(() -> drive.
+				withVelocityX(-axis_Forward * c_MaxSwerveSpeed) // Drive forward with negative Y (forward)
+            	.withVelocityY(-axis_Strafe * c_MaxSwerveSpeed) // Drive left with negative X (left)
+            	.withRotationalRate(-axis_Rotate * c_MaxSwerveAngularRate) // Drive counterclockwise with negative X (left)
         ));
 
-    joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-    joystick.b().whileTrue(drivetrain
-        .applyRequest(() -> point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))));
+    	ctrl_Brake.whileTrue(s_Swerve.applyRequest(() -> brake));
+    	ctrl_Aim.whileTrue(s_Swerve
+        	.applyRequest(() -> point.withModuleDirection(new Rotation2d(-axis_Forward, -axis_Strafe))));
 
-    // reset the field-centric heading on left bumper press
-    joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
+ 	   // reset the field-centric heading on left bumper press
+    	ctrl_ResetHeading.onTrue(s_Swerve.runOnce(() -> s_Swerve.seedFieldRelative()));
+    	if (Utils.isSimulation()) {
+			s_Swerve.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
+    	}
+    	s_Swerve.registerTelemetry(logger::telemeterize);
+  	}
 
-    if (Utils.isSimulation()) {
-      drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
-    }
-    drivetrain.registerTelemetry(logger::telemeterize);
-  }
+  	public RobotContainer() {
+    	configureBindings();
+  	}
 
-  public RobotContainer() {
-    configureBindings();
-  }
-
-  public Command getAutonomousCommand() {
-    return Commands.print("No autonomous command configured");
-  }
+  	public Command getAutonomousCommand() {
+    	return Commands.print("No autonomous command configured");
+  	}
 }
