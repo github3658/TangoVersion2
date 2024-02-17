@@ -2,11 +2,12 @@
 // TODO: Code to calculate motor speed to note distance
 
 package frc.robot.subsystems;
-import edu.wpi.first.wpilibj.motorcontrol.Talon;
+//import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.hardware.ParentDevice;
 //import com.ctre.phoenix6.controls.DutyCycleOut;
 //import com.ctre.phoenix6.controls.PositionVoltage;
 //import com.ctre.phoenix6.controls.VelocityVoltage;
@@ -25,7 +26,7 @@ public class Shooter extends SubsystemBase {
     /* OTHER VARIABLES */
     private double d_ShooterRPM = 0.0;
 
-    private Shooter() {
+    public Shooter() {
         m_ShootLeft = new TalonFX(c_ShootLeftID);
         m_ShootRight = new TalonFX(c_ShootRightID);
         m_ShootLeft.getConfigurator().apply(new TalonFXConfiguration());
@@ -40,6 +41,7 @@ public class Shooter extends SubsystemBase {
 
     @Override
     public void periodic() {
+        outputTelemetry();
     }
 
     public void stop() {
@@ -54,5 +56,10 @@ public class Shooter extends SubsystemBase {
 
     public void setSpeed(double rpm) {
         d_ShooterRPM = rpm;
+    }
+
+    public ParentDevice[] requestOrchDevices() {
+        ParentDevice[] pd = {m_ShootLeft, m_ShootRight};
+        return pd;
     }
 }

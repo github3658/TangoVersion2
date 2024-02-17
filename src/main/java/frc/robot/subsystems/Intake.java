@@ -1,11 +1,12 @@
 // TODO: Define limit for intake tilt?
 
 package frc.robot.subsystems;
-import edu.wpi.first.math.util.Units;
+//import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.hardware.ParentDevice;
 //import com.ctre.phoenix6.controls.DutyCycleOut;
 //import com.ctre.phoenix6.controls.PositionVoltage;
 //import com.ctre.phoenix6.controls.VelocityVoltage;
@@ -43,10 +44,11 @@ public class Intake extends SubsystemBase {
     /* OTHER VARIABLES */
     private double d_IntakePivotVoltage = 0.0;
     private double d_IntakeSpeed       = 0.0;
+    private boolean b_noteLoaded = false;
     private PivotTarget e_PivotTarget  = PivotTarget.Stow;
     private IntakeState e_IntakeState  = IntakeState.None;
 
-    private Intake() {
+    public Intake() {
         m_IntakeNote = new TalonFX(c_IntakeNoteID);
         m_IntakeNote.getConfigurator().apply(new TalonFXConfiguration());
         m_IntakeNote.setNeutralMode(NeutralModeValue.Coast);
@@ -63,10 +65,23 @@ public class Intake extends SubsystemBase {
 
         // Pivot Control
         double d_PivotAngle = pivotTargetToAngle(e_PivotTarget);
+        // TODO: Intake periodic: Find equivalent for PID calculate method
         //d_IntakePivotVoltage = m_pivotPID.calculate(getPivotAngleDegrees(), pivot_angle);
 
         // Intake Control
         d_IntakeSpeed = intakeStateToSpeed(e_IntakeState);
+
+        // Stow on detect
+        if (intakeHasNote() && !b_noteLoaded) {
+            e_PivotTarget = PivotTarget.Stow;
+            e_IntakeState = IntakeState.None;
+            b_noteLoaded = true;
+        }
+        else if (!intakeHasNote() && b_noteLoaded) {
+            b_noteLoaded = false;
+        }
+
+        outputTelemetry();
     }
 
     public void stop() {
@@ -79,9 +94,6 @@ public class Intake extends SubsystemBase {
         SmartDashboard.putNumber("Pivot Encoder (get)", m_IntakePivot.getPosition().getValueAsDouble());
         SmartDashboard.putNumber("Pivot Encoder (angle)", getPivotAngleDegrees());
         SmartDashboard.putNumber("Pivot Target Angle", pivotTargetToAngle(e_PivotTarget));
-
-        SmartDashboard.putNumber("Pivot Voltage", d_IntakePivotVoltage);
-        SmartDashboard.putNumber("Pivot Current", m_IntakePivot.getSupplyCurrent().getValueAsDouble());
 
         SmartDashboard.putBoolean("Has Note?", intakeHasNote());
     }
@@ -113,8 +125,10 @@ public class Intake extends SubsystemBase {
         return e_IntakeState;
     }
 
+    // TODO: getPivotAngleDegrees: Import Helpers or find modRotations equivalent
     public double getPivotAngleDegrees() {
-        return Units.rotationsToDegrees(Helpers.modRotations(m_IntakePivot.getPosition().getValueAsDouble() - c_EncoderOffset + 0.5));
+        return 0;
+        //return Units.rotationsToDegrees(Helpers.modRotations(m_IntakePivot.getPosition().getValueAsDouble() - c_EncoderOffset + 0.5));
     }
 
     public boolean intakeHasNote() {
@@ -184,5 +198,10 @@ public class Intake extends SubsystemBase {
 
     private boolean isPivotAtTarget() {
         return Math.abs(getPivotAngleDegrees() - pivotTargetToAngle(e_PivotTarget)) < 5;
+    }
+
+    public ParentDevice[] requestOrchDevices() {
+        ParentDevice[] pd = {m_IntakeNote, m_IntakePivot};
+        return pd;
     }
 }
