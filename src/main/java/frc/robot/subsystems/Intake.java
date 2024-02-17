@@ -13,6 +13,7 @@ import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 //import frc.robot.Helpers;
+import edu.wpi.first.wpilibj.AnalogInput;
 
 public class Intake extends SubsystemBase {
     /* CONSTANTS (prefix: c) */
@@ -41,6 +42,9 @@ public class Intake extends SubsystemBase {
     private final TalonFX m_IntakeNote;
     private final TalonFX m_IntakePivot;
 
+    /* ENCODERS (prefix: e) */
+    private final AnalogInput e_Encoder;
+
     /* OTHER VARIABLES */
     private double d_IntakePivotVoltage = 0.0;
     private double d_IntakeSpeed       = 0.0;
@@ -56,7 +60,9 @@ public class Intake extends SubsystemBase {
         m_IntakePivot = new TalonFX(c_IntakePivotID);
         m_IntakePivot.getConfigurator().apply(new TalonFXConfiguration());
         m_IntakePivot.setNeutralMode(NeutralModeValue.Brake);
-        // Limit?
+        
+        e_Encoder = new AnalogInput(0);
+        // TODO: How do you reference a through bore encoder without SparkMAX? Is it just an analogue input?
     }
 
     @Override
