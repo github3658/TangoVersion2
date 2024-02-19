@@ -16,24 +16,34 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 public class Shooter extends SubsystemBase {
 	/* CONSTANTS (prefix: c) */
-	private final int c_ShootLeftID = 99; // TODO: Define values for shooter motor IDs
-	private final int c_ShootRightID = 99;
+	private final int c_ShootLeftID   = 14; // TODO: Define values for shooter motor IDs
+	private final int c_ShootRightID  = 15;
+	private final int c_ShootPivotID  = 16;
+	private final int c_ShootExtendID = 13;
 
 	/* MOTORS (prefix: m) */
 	private final TalonFX m_ShootLeft;
 	private final TalonFX m_ShootRight;
+	private final TalonFX m_ShootPivot;
+	private final TalonFX m_ShootExtend;
 
 	/* OTHER VARIABLES */
-	private double d_ShooterRPM = 0.0;
+	private double d_ShooterSpeed = 0.0;
 
 	public Shooter() {
 		m_ShootLeft = new TalonFX(c_ShootLeftID);
 		m_ShootRight = new TalonFX(c_ShootRightID);
+		m_ShootPivot = new TalonFX(c_ShootPivotID);
+		m_ShootExtend = new TalonFX(c_ShootExtendID);
 		m_ShootLeft.getConfigurator().apply(new TalonFXConfiguration());
 		m_ShootRight.getConfigurator().apply(new TalonFXConfiguration());
+		m_ShootPivot.getConfigurator().apply(new TalonFXConfiguration());
+		m_ShootExtend.getConfigurator().apply(new TalonFXConfiguration());
 
 		m_ShootLeft.setNeutralMode(NeutralModeValue.Coast);
 		m_ShootLeft.setNeutralMode(NeutralModeValue.Coast);
+		m_ShootPivot.setNeutralMode(NeutralModeValue.Brake);
+		m_ShootExtend.setNeutralMode(NeutralModeValue.Brake);
 
 		m_ShootLeft.setInverted(true);
 		m_ShootRight.setInverted(false);
@@ -41,6 +51,8 @@ public class Shooter extends SubsystemBase {
 
 	@Override
 	public void periodic() {
+		m_ShootLeft.set(d_ShooterSpeed);
+		m_ShootRight.set(d_ShooterSpeed);
 		outputTelemetry();
 	}
 
@@ -49,13 +61,13 @@ public class Shooter extends SubsystemBase {
 	}
 
 	public void outputTelemetry() {
-		SmartDashboard.putNumber("Shooter RPM", d_ShooterRPM);
+		SmartDashboard.putNumber("Shooter Speed", d_ShooterSpeed);
 		SmartDashboard.putNumber("Left Speed", m_ShootLeft.getVelocity().getValueAsDouble());
 		SmartDashboard.putNumber("Right Speed", m_ShootRight.getVelocity().getValueAsDouble());
 	}
 
-	public void setSpeed(double rpm) {
-		d_ShooterRPM = rpm;
+	public void setSpeed(double speed) {
+		d_ShooterSpeed = speed;
 	}
 
 	public ParentDevice[] requestOrchDevices() {

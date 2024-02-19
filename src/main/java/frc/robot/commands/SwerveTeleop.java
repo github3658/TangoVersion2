@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Swerve;
 
-public class SwerveDriveRamped extends Command {
+public class SwerveTeleop extends Command {
     private final Swerve s_Swerve;
 
     private final double c_MaxSwerveSpeed = TunerConstants.kSpeedAt12VoltsMps; // kSpeedAt12VoltsMps desired top speed
@@ -18,14 +18,15 @@ public class SwerveDriveRamped extends Command {
     private final int c_AccelTime = 50;
     private double d_SwerveRamp = 0.0;
 
-    private GenericHID xb_driver = new GenericHID(0);
+    private GenericHID xb_Driver;
 
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
     .withDeadband(c_MaxSwerveSpeed * 0.1).withRotationalDeadband(c_MaxSwerveAngularRate * 0.1) // Add a 10% deadband
     .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // I want field-centric
 
-    public SwerveDriveRamped(Swerve subsystem) {
+    public SwerveTeleop(Swerve subsystem, GenericHID port0) {
         s_Swerve = subsystem;
+        xb_Driver = new GenericHID(0);
         addRequirements(s_Swerve);
     }
 
@@ -35,9 +36,9 @@ public class SwerveDriveRamped extends Command {
 
     @Override
     public void execute() {
-        double forward = -Math.pow(xb_driver.getRawAxis(XboxController.Axis.kLeftY.value),3);
-        double strafe = -Math.pow(xb_driver.getRawAxis(XboxController.Axis.kLeftX.value),3);
-        double rotate = -Math.pow(xb_driver.getRawAxis(XboxController.Axis.kRightX.value),3);
+        double forward = 0.05;//-Math.pow(xb_Driver.getRawAxis(XboxController.Axis.kLeftY.value),3);
+        double strafe = -Math.pow(xb_Driver.getRawAxis(XboxController.Axis.kLeftX.value),3);
+        double rotate = -Math.pow(xb_Driver.getRawAxis(XboxController.Axis.kRightX.value),3);
 
         if (Math.abs(forward) > c_SwerveRampDeadzone || Math.abs(strafe) > c_SwerveRampDeadzone || Math.abs(rotate) > c_SwerveRampDeadzone) {
             d_SwerveRamp = Math.min(d_SwerveRamp+1/c_AccelTime,1);
@@ -56,6 +57,6 @@ public class SwerveDriveRamped extends Command {
 
     @Override
     public boolean isFinished() {
-        return true;
+        return false;
     }
 }

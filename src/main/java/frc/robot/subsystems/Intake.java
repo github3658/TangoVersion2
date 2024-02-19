@@ -46,11 +46,10 @@ public class Intake extends SubsystemBase {
     private final AnalogInput e_Encoder;
 
     /* OTHER VARIABLES */
-    private double d_IntakePivotVoltage = 0.0;
-    private double d_IntakeSpeed       = 0.0;
+    private double d_IntakeSpeed = 0.0;
     private boolean b_noteLoaded = false;
-    private PivotTarget e_PivotTarget  = PivotTarget.Stow;
-    private IntakeState e_IntakeState  = IntakeState.None;
+    private PivotTarget e_PivotTarget = PivotTarget.Stow;
+    private IntakeState e_IntakeState = IntakeState.None;
 
     public Intake() {
         m_IntakeNote = new TalonFX(c_IntakeNoteID);
@@ -71,11 +70,11 @@ public class Intake extends SubsystemBase {
 
         // Pivot Control
         double d_PivotAngle = pivotTargetToAngle(e_PivotTarget);
-        // TODO: Intake periodic: Find equivalent for PID calculate method
-        //d_IntakePivotVoltage = m_pivotPID.calculate(getPivotAngleDegrees(), pivot_angle);
+        // TODO: Intake periodic: Find equivalent for PID calculate method. This is probably just math with the encoder value and motor speed. As it stands, we cannot do this until we find a way to reference the encoder.
 
         // Intake Control
         d_IntakeSpeed = intakeStateToSpeed(e_IntakeState);
+        m_IntakeNote.set(d_IntakeSpeed);
 
         // Stow on detect
         if (intakeHasNote() && !b_noteLoaded) {
@@ -91,7 +90,6 @@ public class Intake extends SubsystemBase {
     }
 
     public void stop() {
-        d_IntakePivotVoltage = 0.0;
         d_IntakeSpeed = 0.0;
     }
 
@@ -118,7 +116,9 @@ public class Intake extends SubsystemBase {
     public double intakeStateToSpeed(IntakeState state) {
         switch (state) {
             case Intake:
+                return 0.30;
             case Eject:
+                return -0.30;
             case Pulse:
             case FeedShooter:
             default:
