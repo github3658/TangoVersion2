@@ -1,5 +1,6 @@
 // TODO: Find and define limits for shooter motors?
 // TODO: Code to calculate motor speed to note distance
+// TODO: Finalize shooter controls with drive team
 
 package frc.robot.subsystems;
 //import edu.wpi.first.wpilibj.motorcontrol.Talon;
@@ -31,10 +32,10 @@ public class Shooter extends SubsystemBase {
 	private double d_ShooterSpeed = 0.0;
 
 	public Shooter() {
-		m_ShootLeft = new TalonFX(c_ShootLeftID);
-		m_ShootRight = new TalonFX(c_ShootRightID);
-		m_ShootPivot = new TalonFX(c_ShootPivotID);
-		m_ShootExtend = new TalonFX(c_ShootExtendID);
+		m_ShootLeft = new TalonFX(c_ShootLeftID, "3658CANivore");
+		m_ShootRight = new TalonFX(c_ShootRightID, "3658CANivore");
+		m_ShootPivot = new TalonFX(c_ShootPivotID, "3658CANivore");
+		m_ShootExtend = new TalonFX(c_ShootExtendID, "3658CANivore");
 		m_ShootLeft.getConfigurator().apply(new TalonFXConfiguration());
 		m_ShootRight.getConfigurator().apply(new TalonFXConfiguration());
 		m_ShootPivot.getConfigurator().apply(new TalonFXConfiguration());

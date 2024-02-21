@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 //import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.XboxController;
 //import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
@@ -30,9 +31,9 @@ public class RobotContainer {
 
 	/* SUBSYSTEM DEFINITIONS (prefix: s) */
 	private final Swerve   s_Swerve   = TunerConstants.DriveTrain;
-	//private final Shooter  s_Shooter  = new Shooter();
-	//private final Intake   s_Intake   = new Intake();
-	//private final Climber  s_Climber  = new Climber();
+	private final Shooter  s_Shooter  = new Shooter();
+	private final Intake   s_Intake   = new Intake();
+	private final Climber  s_Climber  = new Climber();
 
 	/* INPUT DEVICES (prefix: xb) */
 	private final GenericHID xb_Driver = new GenericHID(0);
@@ -69,15 +70,15 @@ public class RobotContainer {
 
   	public RobotContainer() {
 		// Init orchestra
-		//for (ParentDevice pd : s_Climber.requestOrchDevices()) {
-		//	o_Orchestra.addInstrument(pd);
-		//}
-		// for (ParentDevice pd : s_Intake.requestOrchDevices()) {
-		// 	o_Orchestra.addInstrument(pd);
-		// }
-		// for (ParentDevice pd : s_Shooter.requestOrchDevices()) {
-		// 	o_Orchestra.addInstrument(pd);
-		// }
+		for (ParentDevice pd : s_Climber.requestOrchDevices()) {
+			o_Orchestra.addInstrument(pd);
+		}
+		for (ParentDevice pd : s_Intake.requestOrchDevices()) {
+			o_Orchestra.addInstrument(pd);
+		}
+		for (ParentDevice pd : s_Shooter.requestOrchDevices()) {
+			o_Orchestra.addInstrument(pd);
+		}
 		for (ParentDevice pd : s_Swerve.requestOrchDevices()) {
 			o_Orchestra.addInstrument(pd);
 		}

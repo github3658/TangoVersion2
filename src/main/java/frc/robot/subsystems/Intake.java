@@ -1,4 +1,5 @@
 // TODO: Define limit for intake tilt?
+// TODO: Finalize intake controls with drive team
 
 package frc.robot.subsystems;
 //import edu.wpi.first.math.util.Units;
@@ -52,11 +53,11 @@ public class Intake extends SubsystemBase {
     private IntakeState e_IntakeState = IntakeState.None;
 
     public Intake() {
-        m_IntakeNote = new TalonFX(c_IntakeNoteID);
+        m_IntakeNote = new TalonFX(c_IntakeNoteID, "3658CANivore");
         m_IntakeNote.getConfigurator().apply(new TalonFXConfiguration());
         m_IntakeNote.setNeutralMode(NeutralModeValue.Coast);
 
-        m_IntakePivot = new TalonFX(c_IntakePivotID);
+        m_IntakePivot = new TalonFX(c_IntakePivotID, "3658CANivore");
         m_IntakePivot.getConfigurator().apply(new TalonFXConfiguration());
         m_IntakePivot.setNeutralMode(NeutralModeValue.Brake);
         

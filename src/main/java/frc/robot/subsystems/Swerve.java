@@ -32,22 +32,22 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         if (Utils.isSimulation()) {
             startSimThread();
         }
-        // for (int i = 0; i < 4; i++) {
-        //     SwerveModule s = this.getModule(i);
-        //     s.getDriveMotor().setNeutralMode(NeutralModeValue.Coast);
-        //     s.getSteerMotor().setNeutralMode(NeutralModeValue.Coast);
-        // }
+        for (int i = 0; i < 4; i++) {
+            SwerveModule s = this.getModule(i);
+            s.getDriveMotor().setNeutralMode(NeutralModeValue.Coast);
+            s.getSteerMotor().setNeutralMode(NeutralModeValue.Coast);
+        }
     }
     public Swerve(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
         super(driveTrainConstants, modules);
         if (Utils.isSimulation()) {
             startSimThread();
         }
-        // for (int i = 0; i < 4; i++) {
-        //     SwerveModule s = this.getModule(i);
-        //     s.getDriveMotor().setNeutralMode(NeutralModeValue.Coast);
-        //     s.getSteerMotor().setNeutralMode(NeutralModeValue.Coast);
-        // }
+        for (int i = 0; i < 4; i++) {
+            SwerveModule s = this.getModule(i);
+            s.getDriveMotor().setNeutralMode(NeutralModeValue.Coast);
+            s.getSteerMotor().setNeutralMode(NeutralModeValue.Coast);
+        }
     }
 
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {

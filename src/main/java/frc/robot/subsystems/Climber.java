@@ -1,4 +1,5 @@
 // TODO: Define limits for lift motor?
+// TODO: Finalize climber controls with drive team
 
 
 package frc.robot.subsystems;
@@ -24,8 +25,8 @@ public class Climber extends SubsystemBase {
     private double d_ClimbRightSpeed = 0.0;
 
     public Climber() {
-        m_ClimbLeft = new TalonFX(c_ClimbLeftID);
-        m_ClimbRight = new TalonFX(c_ClimbRightID);
+        m_ClimbLeft = new TalonFX(c_ClimbLeftID, "3658CANivore");
+        m_ClimbRight = new TalonFX(c_ClimbRightID, "3658CANivore");
 
         // TODO: Configure encoder ratios?
 
