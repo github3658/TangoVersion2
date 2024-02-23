@@ -34,8 +34,8 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         }
         for (int i = 0; i < 4; i++) {
             SwerveModule s = this.getModule(i);
-            s.getDriveMotor().setNeutralMode(NeutralModeValue.Coast);
-            s.getSteerMotor().setNeutralMode(NeutralModeValue.Coast);
+            s.getDriveMotor().setNeutralMode(NeutralModeValue.Brake); //Changed into Brake mode
+            s.getSteerMotor().setNeutralMode(NeutralModeValue.Brake); //Changed into Brake mode
         }
     }
     public Swerve(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
@@ -45,8 +45,8 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         }
         for (int i = 0; i < 4; i++) {
             SwerveModule s = this.getModule(i);
-            s.getDriveMotor().setNeutralMode(NeutralModeValue.Coast);
-            s.getSteerMotor().setNeutralMode(NeutralModeValue.Coast);
+            s.getDriveMotor().setNeutralMode(NeutralModeValue.Brake); //Changed into Brake mode
+            s.getSteerMotor().setNeutralMode(NeutralModeValue.Brake); //Changed into Brake mode
         }
     }
 
