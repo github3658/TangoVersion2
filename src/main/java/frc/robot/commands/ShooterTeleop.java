@@ -24,9 +24,12 @@ public class ShooterTeleop extends Command {
 
     @Override
     public void execute() {
-        if (xb_Operator.getRawButtonPressed(ctrl_Operator_ButtonB)) {
-            s_Shooter.setSpeed(0.6);
-        }
+        // if (xb_Operator.getRawButtonPressed(ctrl_Operator_ButtonB)) {
+        //     s_Shooter.setSpeed(0.6);
+        // }
+        // if (xb_Operator.getRawButtonPressed(XboxController.Button.kStart.value)) {
+        //     s_Shooter.setSpeed(0.0);
+        // }
     }
 
     @Override

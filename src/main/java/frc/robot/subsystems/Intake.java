@@ -15,6 +15,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 //import frc.robot.Helpers;
 import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.DigitalInput;
 
 public class Intake extends SubsystemBase {
     /* CONSTANTS (prefix: c) */
@@ -43,14 +44,18 @@ public class Intake extends SubsystemBase {
     private final TalonFX m_IntakeNote;
     private final TalonFX m_IntakePivot;
 
-    /* ENCODERS (prefix: e) */
-    private final AnalogInput e_Encoder;
+    /* SENSORS (prefix: n) */
+    //private final AnalogInput n_Encoder;
+    private final DigitalInput n_NoteDetect;
 
     /* OTHER VARIABLES */
     private double d_IntakeSpeed = 0.0;
-    private boolean b_noteLoaded = false;
+    private double d_IntakePivotSpeed = 0.0;
+    private double d_PivotOffset = 0.0;
+    private int i_IntakeSwitchDelay = 0;
     private PivotTarget e_PivotTarget = PivotTarget.Stow;
     private IntakeState e_IntakeState = IntakeState.None;
+    private IntakeState e_IntakeStateGOAL = IntakeState.None;
 
     public Intake() {
         m_IntakeNote = new TalonFX(c_IntakeNoteID, "3658CANivore");
@@ -61,7 +66,11 @@ public class Intake extends SubsystemBase {
         m_IntakePivot.getConfigurator().apply(new TalonFXConfiguration());
         m_IntakePivot.setNeutralMode(NeutralModeValue.Brake);
         
-        e_Encoder = new AnalogInput(0);
+        d_PivotOffset = m_IntakePivot.getPosition().getValueAsDouble();
+
+        //n_Encoder = new AnalogInput(8);
+        n_NoteDetect = new DigitalInput(9);
+
         // TODO: How do you reference a through bore encoder without SparkMAX? Is it just an analogue input?
     }
 
@@ -74,17 +83,33 @@ public class Intake extends SubsystemBase {
         // TODO: Intake periodic: Find equivalent for PID calculate method. This is probably just math with the encoder value and motor speed. As it stands, we cannot do this until we find a way to reference the encoder.
 
         // Intake Control
-        d_IntakeSpeed = intakeStateToSpeed(e_IntakeState);
-        m_IntakeNote.set(d_IntakeSpeed);
-
-        // Stow on detect
-        if (intakeHasNote() && !b_noteLoaded) {
-            e_PivotTarget = PivotTarget.Stow;
-            e_IntakeState = IntakeState.None;
-            b_noteLoaded = true;
+        if (i_IntakeSwitchDelay > 0) {  // Sometimes it is necessary to delay the intake state for power management or to ensure we have a note
+            i_IntakeSwitchDelay--;
         }
-        else if (!intakeHasNote() && b_noteLoaded) {
-            b_noteLoaded = false;
+        else {
+            e_IntakeState = e_IntakeStateGOAL;
+        }
+
+        d_IntakeSpeed = intakeStateToSpeed(e_IntakeState);
+        if (isPivotAtTarget() || i_IntakeSwitchDelay > 0) {
+            m_IntakeNote.set(d_IntakeSpeed);
+        }
+        else {
+            m_IntakeNote.set(0.0);
+        }
+       
+
+        // Pivot control
+        if (e_PivotTarget != PivotTarget.None) {
+            double d_CurrentPivot = getPivotAngle();
+            d_IntakePivotSpeed = Math.max(Math.min(((d_PivotAngle - d_CurrentPivot) / 20 * 0.35),0.40),-0.40);
+        }
+        m_IntakePivot.set(d_IntakePivotSpeed);
+
+        // Stow on detect ground note
+        if (e_PivotTarget == PivotTarget.Ground && intakeHasNote()) {
+            //i_IntakeSwitchDelay = 12;
+            setStateToStow();
         }
 
         outputTelemetry();
@@ -95,29 +120,31 @@ public class Intake extends SubsystemBase {
     }
 
     public void outputTelemetry() {
-        SmartDashboard.putNumber("Intake Speed", intakeStateToSpeed(e_IntakeState));
-        SmartDashboard.putNumber("Pivot Encoder (get)", m_IntakePivot.getPosition().getValueAsDouble());
-        SmartDashboard.putNumber("Pivot Encoder (angle)", getPivotAngleDegrees());
+        //SmartDashboard.putNumber("Intake Speed", intakeStateToSpeed(e_IntakeState));
+        SmartDashboard.putNumber("Pivot Encoder", getPivotAngle());
         SmartDashboard.putNumber("Pivot Target Angle", pivotTargetToAngle(e_PivotTarget));
-
         SmartDashboard.putBoolean("Has Note?", intakeHasNote());
+        SmartDashboard.putBoolean("Pivot in place?", isPivotAtTarget());
+        SmartDashboard.putNumber("Pivot Stator Current", getPivotCurrent());
+        //SmartDashboard.putNumber("Pivot Speed", d_IntakePivotSpeed);
     }
 
     public double pivotTargetToAngle(PivotTarget target) {
         switch (target) {
             case Ground:
+                return -42.0;
             case Source:
             case Amp:
             case Stow:
             default:
-                return 180;
+                return 0.0;
         }
     }
 
     public double intakeStateToSpeed(IntakeState state) {
         switch (state) {
             case Intake:
-                return 0.30;
+                return 0.35;
             case Eject:
                 return -0.30;
             case Pulse:
@@ -132,79 +159,94 @@ public class Intake extends SubsystemBase {
         return e_IntakeState;
     }
 
-    // TODO: getPivotAngleDegrees: Import Helpers or find modRotations equivalent
-    public double getPivotAngleDegrees() {
-        return 0;
-        //return Units.rotationsToDegrees(Helpers.modRotations(m_IntakePivot.getPosition().getValueAsDouble() - c_EncoderOffset + 0.5));
+    public double getPivotAngle() {
+        return m_IntakePivot.getPosition().getValueAsDouble() - d_PivotOffset;
     }
 
     public boolean intakeHasNote() {
-        // limit switch or detection method of some kind.
-        // TODO: Implement intakeHasNote
-        return false;
+        return !n_NoteDetect.get();
+    }
+
+    public void resetOffset() {
+        d_PivotOffset = getPivotAngle();
+    }
+
+    public double getPivotCurrent() {
+        return m_IntakePivot.getStatorCurrent().getValueAsDouble();
     }
 
     // Pivot functions
     public void setStateToGround() {
         e_PivotTarget = PivotTarget.Ground;
-        e_IntakeState = IntakeState.Intake;
+        e_IntakeStateGOAL = IntakeState.Intake;
     }
 
     public void setStateToSource() {
         e_PivotTarget = PivotTarget.Source;
-        e_IntakeState = IntakeState.None;
+        e_IntakeStateGOAL = IntakeState.None;
     }
 
     public void setStateToAmp() {
         e_PivotTarget = PivotTarget.Amp;
-        e_IntakeState = IntakeState.None;
+        e_IntakeStateGOAL = IntakeState.None;
     }
 
-    public void setStatetoStow() {
+    public void setStateToStow() {
         e_PivotTarget = PivotTarget.Stow;
-        e_IntakeState = IntakeState.None;
+        e_IntakeStateGOAL = IntakeState.None;
     }
 
     public void setPivot(PivotTarget target) {
         e_PivotTarget = target;
     }
 
+    public void overridePivotSpeed(double speed) {
+        e_PivotTarget = PivotTarget.None;
+        d_IntakePivotSpeed = speed;
+    }
+
     // Intake functions
     public void intake() {
-        e_IntakeState = IntakeState.Intake;
+        e_IntakeStateGOAL = IntakeState.Intake;
+        i_IntakeSwitchDelay = 0;
     }
 
     public void eject() {
-        e_IntakeState = IntakeState.Eject;
+        e_IntakeStateGOAL = IntakeState.Eject;
+        i_IntakeSwitchDelay = 0;
     }
 
     public void pulse() {
-        e_IntakeState = IntakeState.Pulse;
+        e_IntakeStateGOAL = IntakeState.Pulse;
+        i_IntakeSwitchDelay = 0;
     }
 
     public void feedShooter() {
-        e_IntakeState = IntakeState.FeedShooter;
+        e_IntakeStateGOAL = IntakeState.FeedShooter;
+        i_IntakeSwitchDelay = 0;
     }
 
     public void stopIntake() {
-        e_IntakeState = IntakeState.None;
+        e_IntakeStateGOAL = IntakeState.None;
         d_IntakeSpeed = 0.0;
+        i_IntakeSwitchDelay = 0;
     }
 
     public void setIntake(IntakeState state) {
-        e_IntakeState = state;
+        e_IntakeStateGOAL = state;
+        i_IntakeSwitchDelay = 0;
     }
 
     // Private functions
     private void checkAutoTasks() {
-        if (e_PivotTarget == PivotTarget.Ground && intakeHasNote() && isPivotAtTarget()) {
-            e_PivotTarget = PivotTarget.Stow;
-            e_IntakeState = IntakeState.None;
-        }
+        // if (e_PivotTarget == PivotTarget.Ground && intakeHasNote() && isPivotAtTarget()) {
+        //     e_PivotTarget = PivotTarget.Stow;
+        //     e_IntakeState = IntakeState.None;
+        // }
     }
 
     private boolean isPivotAtTarget() {
-        return Math.abs(getPivotAngleDegrees() - pivotTargetToAngle(e_PivotTarget)) < 5;
+        return Math.abs(getPivotAngle() - pivotTargetToAngle(e_PivotTarget)) < 5;
     }
 
     public ParentDevice[] requestOrchDevices() {

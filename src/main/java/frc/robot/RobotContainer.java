@@ -16,6 +16,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 //import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 //import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -33,7 +34,7 @@ public class RobotContainer {
 	private final Swerve   s_Swerve   = TunerConstants.DriveTrain;
 	private final Shooter  s_Shooter  = new Shooter();
 	private final Intake   s_Intake   = new Intake();
-	private final Climber  s_Climber  = new Climber();
+	//private final Climber  s_Climber  = new Climber();
 
 	/* INPUT DEVICES (prefix: xb) */
 	private final GenericHID xb_Driver = new GenericHID(0);
@@ -42,6 +43,8 @@ public class RobotContainer {
 	/* CONTROL AXES (prefix: axis) */
 
 	/* CONTROL BUTTONS (prefix: ctrl) */
+	private JoystickButton ctrl_Shoot = new JoystickButton(xb_Operator, XboxController.Button.kB.value);
+	private JoystickButton ctrl_ZeroIntake = new JoystickButton(xb_Operator, XboxController.Button.kStart.value);
 	
 	/* OTHER VARIABLES */
 	private final Orchestra o_Orchestra = new Orchestra();
@@ -51,8 +54,15 @@ public class RobotContainer {
   	private final Telemetry logger = new Telemetry(c_MaxSwerveSpeed);
 
   	private void configureBindings() {
+		// These commands contain isolated subsystem behavior
     	s_Swerve.setDefaultCommand(new SwerveTeleop(s_Swerve,xb_Driver));
-		//s_Intake.setDefaultCommand(new IntakeTeleop(s_Intake,xb_Operator));
+		s_Intake.setDefaultCommand(new IntakeTeleop(s_Intake,xb_Operator));
+		s_Shooter.setDefaultCommand(new ShooterTeleop(s_Shooter,xb_Operator));
+
+		// These are more complex behaviors that call upon multiple subsystems.
+
+		ctrl_Shoot.onTrue(new ShootSpeaker(s_Shooter, s_Intake));
+		ctrl_ZeroIntake.onTrue(new ZeroIntake(s_Intake));
 
     	//ctrl_Brake.whileTrue(s_Swerve.applyRequest(() -> brake));
     	//ctrl_Aim.whileTrue(s_Swerve
@@ -70,15 +80,15 @@ public class RobotContainer {
 
   	public RobotContainer() {
 		// Init orchestra
-		for (ParentDevice pd : s_Climber.requestOrchDevices()) {
-			o_Orchestra.addInstrument(pd);
-		}
-		for (ParentDevice pd : s_Intake.requestOrchDevices()) {
-			o_Orchestra.addInstrument(pd);
-		}
-		for (ParentDevice pd : s_Shooter.requestOrchDevices()) {
-			o_Orchestra.addInstrument(pd);
-		}
+		// for (ParentDevice pd : s_Climber.requestOrchDevices()) {
+		// 	o_Orchestra.addInstrument(pd);
+		// }
+		// for (ParentDevice pd : s_Intake.requestOrchDevices()) {
+		// 	o_Orchestra.addInstrument(pd);
+		// }
+		// for (ParentDevice pd : s_Shooter.requestOrchDevices()) {
+		// 	o_Orchestra.addInstrument(pd);
+		// }
 		for (ParentDevice pd : s_Swerve.requestOrchDevices()) {
 			o_Orchestra.addInstrument(pd);
 		}
