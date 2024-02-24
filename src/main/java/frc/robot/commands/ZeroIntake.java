@@ -6,7 +6,6 @@ import frc.robot.subsystems.Intake;
 
 public class ZeroIntake extends Command {
     private final Intake s_Intake;
-    private double d_LastValue = 0.0;
 
     public ZeroIntake(Intake subsystem) {
         s_Intake = subsystem;
@@ -19,16 +18,12 @@ public class ZeroIntake extends Command {
 
     @Override
     public void execute() {
-
-        if (s_Intake.getPivotCurrent() > 10.0) {
-            end(true);
-        }
         s_Intake.overridePivotSpeed(0.05);
-        d_LastValue = s_Intake.getPivotAngle();
     }
 
     @Override
     public void end(boolean interrupted) {
+        s_Intake.overridePivotSpeed(0.0);
         s_Intake.resetOffset();
         s_Intake.setStateToStow();
     }

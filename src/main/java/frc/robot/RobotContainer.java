@@ -45,6 +45,7 @@ public class RobotContainer {
 	/* CONTROL BUTTONS (prefix: ctrl) */
 	private JoystickButton ctrl_Shoot = new JoystickButton(xb_Operator, XboxController.Button.kB.value);
 	private JoystickButton ctrl_ZeroIntake = new JoystickButton(xb_Operator, XboxController.Button.kStart.value);
+	private JoystickButton ctrl_BohemianRhapsody = new JoystickButton(xb_Operator, XboxController.Button.kLeftStick.value);
 	
 	/* OTHER VARIABLES */
 	private final Orchestra o_Orchestra = new Orchestra();
@@ -56,13 +57,14 @@ public class RobotContainer {
   	private void configureBindings() {
 		// These commands contain isolated subsystem behavior
     	s_Swerve.setDefaultCommand(new SwerveTeleop(s_Swerve,xb_Driver));
-		s_Intake.setDefaultCommand(new IntakeTeleop(s_Intake,xb_Operator));
-		s_Shooter.setDefaultCommand(new ShooterTeleop(s_Shooter,xb_Operator));
+		//s_Intake.setDefaultCommand(new IntakeTeleop(s_Intake,xb_Operator));
+		//s_Shooter.setDefaultCommand(new ShooterTeleop(s_Shooter,xb_Operator));
 
 		// These are more complex behaviors that call upon multiple subsystems.
 
 		ctrl_Shoot.onTrue(new ShootSpeaker(s_Shooter, s_Intake));
-		ctrl_ZeroIntake.onTrue(new ZeroIntake(s_Intake));
+		ctrl_ZeroIntake.whileTrue(new ZeroIntake(s_Intake));
+		ctrl_BohemianRhapsody.onTrue(new PlaySong(o_Orchestra, s_Swerve, s_Intake, s_Shooter, "rickroll.chrp", xb_Operator));
 
     	//ctrl_Brake.whileTrue(s_Swerve.applyRequest(() -> brake));
     	//ctrl_Aim.whileTrue(s_Swerve
@@ -89,9 +91,9 @@ public class RobotContainer {
 		// for (ParentDevice pd : s_Shooter.requestOrchDevices()) {
 		// 	o_Orchestra.addInstrument(pd);
 		// }
-		for (ParentDevice pd : s_Swerve.requestOrchDevices()) {
-			o_Orchestra.addInstrument(pd);
-		}
+		// for (ParentDevice pd : s_Swerve.requestOrchDevices()) {
+		// 	o_Orchestra.addInstrument(pd);
+		// }
     	configureBindings();
   	}
 

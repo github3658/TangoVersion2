@@ -15,13 +15,13 @@ public class SwerveTeleop extends Command {
     private final double c_MaxSwerveSpeed = TunerConstants.kSpeedAt12VoltsMps; // kSpeedAt12VoltsMps desired top speed
   	private final double c_MaxSwerveAngularRate = 1.5 * Math.PI; // 3/4 of a rotation per second max angular velocity
     private final double c_SwerveRampDeadzone = 0.05;
-    private final int c_AccelTime = 50;
+    private final double c_AccelTime = 50.0;
     private double d_SwerveRamp = 0.0;
 
     private GenericHID xb_Driver;
 
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-    .withDeadband(c_MaxSwerveSpeed * 0.1).withRotationalDeadband(c_MaxSwerveAngularRate * 0.1) // Add a 10% deadband
+    //.withDeadband(c_MaxSwerveSpeed * 0.1).withRotationalDeadband(c_MaxSwerveAngularRate * 0.1) // Add a 10% deadband
     .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // I want field-centric
 
     public SwerveTeleop(Swerve subsystem, GenericHID port0) {
@@ -36,7 +36,7 @@ public class SwerveTeleop extends Command {
 
     @Override
     public void execute() {
-        double forward = 0.05;//-Math.pow(xb_Driver.getRawAxis(XboxController.Axis.kLeftY.value),3);
+        double forward = -Math.pow(xb_Driver.getRawAxis(XboxController.Axis.kLeftY.value),3);
         double strafe = -Math.pow(xb_Driver.getRawAxis(XboxController.Axis.kLeftX.value),3);
         double rotate = -Math.pow(xb_Driver.getRawAxis(XboxController.Axis.kRightX.value),3);
 

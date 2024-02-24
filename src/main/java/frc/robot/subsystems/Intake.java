@@ -11,10 +11,10 @@ import com.ctre.phoenix6.hardware.ParentDevice;
 //import com.ctre.phoenix6.controls.DutyCycleOut;
 //import com.ctre.phoenix6.controls.PositionVoltage;
 //import com.ctre.phoenix6.controls.VelocityVoltage;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 //import frc.robot.Helpers;
-import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DigitalInput;
 
 public class Intake extends SubsystemBase {
@@ -45,7 +45,7 @@ public class Intake extends SubsystemBase {
     private final TalonFX m_IntakePivot;
 
     /* SENSORS (prefix: n) */
-    //private final AnalogInput n_Encoder;
+    private final DutyCycleEncoder n_Encoder;
     private final DigitalInput n_NoteDetect;
 
     /* OTHER VARIABLES */
@@ -68,7 +68,7 @@ public class Intake extends SubsystemBase {
         
         d_PivotOffset = m_IntakePivot.getPosition().getValueAsDouble();
 
-        //n_Encoder = new AnalogInput(8);
+        n_Encoder = new DutyCycleEncoder(8);
         n_NoteDetect = new DigitalInput(9);
 
         // TODO: How do you reference a through bore encoder without SparkMAX? Is it just an analogue input?
@@ -160,7 +160,7 @@ public class Intake extends SubsystemBase {
     }
 
     public double getPivotAngle() {
-        return m_IntakePivot.getPosition().getValueAsDouble() - d_PivotOffset;
+        return n_Encoder.get();
     }
 
     public boolean intakeHasNote() {
@@ -168,7 +168,7 @@ public class Intake extends SubsystemBase {
     }
 
     public void resetOffset() {
-        d_PivotOffset = getPivotAngle();
+        n_Encoder.reset();
     }
 
     public double getPivotCurrent() {
