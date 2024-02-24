@@ -18,13 +18,13 @@ public class ZeroIntake extends Command {
 
     @Override
     public void execute() {
-        s_Intake.overridePivotSpeed(0.05);
+        s_Intake.overridePivotSpeed(0.15);
     }
 
     @Override
     public void end(boolean interrupted) {
         s_Intake.overridePivotSpeed(0.0);
-        s_Intake.resetOffset();
+        //s_Intake.resetOffset();
         s_Intake.setStateToStow();
     }
 

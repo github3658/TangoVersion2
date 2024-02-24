@@ -47,8 +47,7 @@ public class SwerveTeleop extends Command {
             d_SwerveRamp = Math.max(d_SwerveRamp-1/c_AccelTime,0);
         }
 
-        s_Swerve.applyRequest(() -> 
-            drive.
+        s_Swerve.setControl(drive.
             withVelocityX(forward * d_SwerveRamp * c_MaxSwerveSpeed) // Drive forward with negative Y (forward)
             .withVelocityY(strafe * d_SwerveRamp * c_MaxSwerveSpeed) // Drive left with negative X (left)
             .withRotationalRate(rotate * d_SwerveRamp * c_MaxSwerveAngularRate) // Drive counterclockwise with negative X (left)

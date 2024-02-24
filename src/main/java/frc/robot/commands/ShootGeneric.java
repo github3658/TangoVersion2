@@ -4,17 +4,19 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Intake;
 
-public class ShootSpeaker extends Command {
+public class ShootGeneric extends Command {
     private final Shooter s_Shooter;
     private final Intake s_Intake;
 
     private int i_ShooterWarmupDelay;
     private int i_ShutdownDelay;
     private boolean b_SeenNote;
+    private double d_ShooterSpeed = 0.0;
 
-    public ShootSpeaker(Shooter shooter, Intake intake) {
+    public ShootGeneric(Shooter shooter, Intake intake, double speed) {
         s_Shooter = shooter;
         s_Intake = intake;
+        d_ShooterSpeed = speed;
         addRequirements(s_Shooter, s_Intake);
     }
 
@@ -27,15 +29,13 @@ public class ShootSpeaker extends Command {
 
     @Override
     public void execute() {
-        s_Shooter.setSpeed(0.6);
+        s_Shooter.setSpeed(d_ShooterSpeed);
         if (i_ShooterWarmupDelay > 0) {
             i_ShooterWarmupDelay--;
         }
         else {
             s_Intake.eject();
-            if (!b_SeenNote && s_Intake.intakeHasNote()) {
-                b_SeenNote = true;
-            }
+            b_SeenNote = true;
         }
 
         if (b_SeenNote) {

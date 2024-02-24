@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Intake.IntakeState;
+import frc.robot.subsystems.Intake.PivotTarget;
 
 public class IntakeTeleop extends Command {
     private final Intake s_Intake;
@@ -25,11 +26,32 @@ public class IntakeTeleop extends Command {
 
     @Override
     public void execute() {
-        if (xb_Operator.getRawButtonPressed(ctrl_Operator_Intake)) {
-            s_Intake.setStateToGround();
-        }
-        if (xb_Operator.getRawButtonPressed(XboxController.Button.kY.value)) {
-            s_Intake.setStateToStow();
+        if (xb_Operator.getRawButton(XboxController.Button.kLeftBumper.value)) {
+            // Up - Ground State
+            if (xb_Operator.getPOV() == 0 && s_Intake.getPivotTarget() != PivotTarget.Ground) {
+                s_Intake.setStateToGround();
+            }
+            // Right - Amp State
+            else if (xb_Operator.getPOV() == 90 && s_Intake.getPivotTarget() != PivotTarget.Amp) {
+                s_Intake.setStateToAmp();
+            }
+            // Down - Stow State
+            else if (xb_Operator.getPOV() == 180 && s_Intake.getPivotTarget() != PivotTarget.Stow) {
+                s_Intake.setStateToStow();
+            }
+
+            // A - Force Intake
+            if (xb_Operator.getRawButtonPressed(XboxController.Button.kA.value)) {
+                s_Intake.setIntake(IntakeState.Intake);
+            }
+            // B - Force Eject
+            if (xb_Operator.getRawButtonPressed(XboxController.Button.kB.value)) {
+                s_Intake.setIntake(IntakeState.FastEject);
+            }
+            // Y - Force Stop
+            if (xb_Operator.getRawButtonPressed(XboxController.Button.kY.value)) {
+                s_Intake.setIntake(IntakeState.None);
+            }
         }
 
         // if (xb_Operator.getRawButton(XboxController.Button.kRightBumper.value)) {

@@ -36,7 +36,7 @@ public class Intake extends SubsystemBase {
         None,
         Intake,
         Eject,
-        Pulse,
+        FastEject,
         FeedShooter,
     }
 
@@ -53,7 +53,7 @@ public class Intake extends SubsystemBase {
     private double d_IntakePivotSpeed = 0.0;
     private double d_PivotOffset = 0.0;
     private int i_IntakeSwitchDelay = 0;
-    private PivotTarget e_PivotTarget = PivotTarget.Stow;
+    private PivotTarget e_PivotTarget = PivotTarget.None;
     private IntakeState e_IntakeState = IntakeState.None;
     private IntakeState e_IntakeStateGOAL = IntakeState.None;
 
@@ -102,14 +102,22 @@ public class Intake extends SubsystemBase {
         // Pivot control
         if (e_PivotTarget != PivotTarget.None) {
             double d_CurrentPivot = getPivotAngle();
-            d_IntakePivotSpeed = Math.max(Math.min(((d_PivotAngle - d_CurrentPivot) / 20 * 0.35),0.40),-0.40);
+            d_IntakePivotSpeed = Math.max(Math.min(((d_PivotAngle - d_CurrentPivot) / 10 * 0.35),0.40),-0.40);
         }
         m_IntakePivot.set(d_IntakePivotSpeed);
 
         // Stow on detect ground note
         if (e_PivotTarget == PivotTarget.Ground && intakeHasNote()) {
-            //i_IntakeSwitchDelay = 12;
+            i_IntakeSwitchDelay = 12;
             setStateToStow();
+        }
+        else if (e_IntakeState == IntakeState.Intake && intakeHasNote()) {
+            // i_IntakeSwitchDelay = 25;
+            setIntake(IntakeState.None);
+        }
+        else if (e_IntakeState == IntakeState.FastEject && intakeHasNote()) {
+            i_IntakeSwitchDelay = 25;
+            e_IntakeStateGOAL = IntakeState.None;
         }
 
         outputTelemetry();
@@ -117,6 +125,7 @@ public class Intake extends SubsystemBase {
 
     public void stop() {
         d_IntakeSpeed = 0.0;
+        //m_IntakePivot.setNeutralMode(NeutralModeValue.Coast);
     }
 
     public void outputTelemetry() {
@@ -126,15 +135,17 @@ public class Intake extends SubsystemBase {
         SmartDashboard.putBoolean("Has Note?", intakeHasNote());
         SmartDashboard.putBoolean("Pivot in place?", isPivotAtTarget());
         SmartDashboard.putNumber("Pivot Stator Current", getPivotCurrent());
+        SmartDashboard.putString("Intake State", e_IntakeState.name());
         //SmartDashboard.putNumber("Pivot Speed", d_IntakePivotSpeed);
     }
 
     public double pivotTargetToAngle(PivotTarget target) {
         switch (target) {
             case Ground:
-                return -42.0;
+                return -62.0;
             case Source:
             case Amp:
+                return -28.0;
             case Stow:
             default:
                 return 0.0;
@@ -147,7 +158,8 @@ public class Intake extends SubsystemBase {
                 return 0.35;
             case Eject:
                 return -0.30;
-            case Pulse:
+            case FastEject:
+                return -0.55;
             case FeedShooter:
             default:
                 return 0.0;
@@ -159,17 +171,21 @@ public class Intake extends SubsystemBase {
         return e_IntakeState;
     }
 
+    public PivotTarget getPivotTarget() {
+        return e_PivotTarget;
+    }
+
     public double getPivotAngle() {
-        return n_Encoder.get();
+        return (n_Encoder.get()*100)-76.77;
     }
 
     public boolean intakeHasNote() {
         return !n_NoteDetect.get();
     }
 
-    public void resetOffset() {
-        n_Encoder.reset();
-    }
+    // public void resetOffset() {
+    //     n_Encoder.reset();
+    // }
 
     public double getPivotCurrent() {
         return m_IntakePivot.getStatorCurrent().getValueAsDouble();
@@ -213,11 +229,6 @@ public class Intake extends SubsystemBase {
 
     public void eject() {
         e_IntakeStateGOAL = IntakeState.Eject;
-        i_IntakeSwitchDelay = 0;
-    }
-
-    public void pulse() {
-        e_IntakeStateGOAL = IntakeState.Pulse;
         i_IntakeSwitchDelay = 0;
     }
 
