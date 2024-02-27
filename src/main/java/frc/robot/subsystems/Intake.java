@@ -1,27 +1,23 @@
-// TODO: Define limit for intake tilt?
 // TODO: Finalize intake controls with drive team
 
+// This is the intake subsystem. 
+// We use two motors and an absolute encoder to intake notes and pivot to various positions.
+// Most Intake logic exists in the command IntakeTeleop
+
 package frc.robot.subsystems;
-//import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.ParentDevice;
-//import com.ctre.phoenix6.controls.DutyCycleOut;
-//import com.ctre.phoenix6.controls.PositionVoltage;
-//import com.ctre.phoenix6.controls.VelocityVoltage;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-//import frc.robot.Helpers;
 import edu.wpi.first.wpilibj.DigitalInput;
 
 public class Intake extends SubsystemBase {
     /* CONSTANTS (prefix: c) */
     private final int c_IntakeNoteID = 10;
     private final int c_IntakePivotID = 9;
-    private final double c_EncoderOffset = 0; // TODO: Define intake encoder offset
 
     /* ENUMS */
     public enum PivotTarget {
@@ -70,8 +66,6 @@ public class Intake extends SubsystemBase {
 
         n_Encoder = new DutyCycleEncoder(8);
         n_NoteDetect = new DigitalInput(9);
-
-        // TODO: How do you reference a through bore encoder without SparkMAX? Is it just an analogue input?
     }
 
     @Override
@@ -80,8 +74,7 @@ public class Intake extends SubsystemBase {
 
         // Pivot Control
         double d_PivotAngle = pivotTargetToAngle(e_PivotTarget);
-        // TODO: Intake periodic: Find equivalent for PID calculate method. This is probably just math with the encoder value and motor speed. As it stands, we cannot do this until we find a way to reference the encoder.
-
+        
         // Intake Control
         if (i_IntakeSwitchDelay > 0) {  // Sometimes it is necessary to delay the intake state for power management or to ensure we have a note
             i_IntakeSwitchDelay--;

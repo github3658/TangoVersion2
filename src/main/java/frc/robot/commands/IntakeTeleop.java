@@ -1,3 +1,6 @@
+// This command is the default Intake command.
+// It accepts operator input and modifies the Intake state from that.
+
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.XboxController;

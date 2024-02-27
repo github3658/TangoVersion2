@@ -1,3 +1,6 @@
+// This command is the default swerve command.
+// It takes input from the driver controller and applies a slight acceleration value.
+
 package frc.robot.commands;
 
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;

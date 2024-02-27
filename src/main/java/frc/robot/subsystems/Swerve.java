@@ -1,6 +1,7 @@
-package frc.robot.subsystems;
+// This is the swerve subsystem. I didn't write this code, and you shouldn't have to look through this file either.
+// Most swerve functionality is handled through other things.
 
-import java.util.function.Supplier;
+package frc.robot.subsystems;
 
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.hardware.ParentDevice;
@@ -9,13 +10,24 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-//import frc.robot.generated.TunerConstants;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
+import java.util.function.Supplier;
+import java.util.function.Consumer;
+import edu.wpi.first.wpilibj.DriverStation;
 
 /**
  * Class that extends the Phoenix SwerveDrivetrain class and implements subsystem
@@ -25,8 +37,13 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
+    private final Supplier<Pose2d> u_PoseSupplier = () -> m_odometry.getEstimatedPosition();
+    private final Consumer<Pose2d> u_ResetConsumer = pose -> m_odometry.resetPosition(this.getPigeon2().getRotation2d(), getPositions(), pose);
+    private final Supplier<ChassisSpeeds> u_SpeedSupplier = () -> m_kinematics.toChassisSpeeds(getModuleStates());
+    private final Consumer<ChassisSpeeds> u_SpeedConsumer = relativeSpeeds -> driveRobotRelative(relativeSpeeds);
+    private final HolonomicPathFollowerConfig u_PathFollowerConfig = new HolonomicPathFollowerConfig(new PIDConstants(5.0, 0, 0), new PIDConstants(5.0, 0, 0), 4.5, 19.5, new ReplanningConfig());
 
-    public Swerve(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency, SwerveModuleConstants... modules) {
+    public Swerve(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency, SwerveModuleConstants... modules) {    
         super(driveTrainConstants, OdometryUpdateFrequency, modules);
         if (Utils.isSimulation()) {
             startSimThread();
@@ -47,6 +64,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
             s.getDriveMotor().setNeutralMode(NeutralModeValue.Brake); //Changed into Brake mode
             s.getSteerMotor().setNeutralMode(NeutralModeValue.Brake); //Changed into Brake mode
         }
+        AutoBuilder.configureHolonomic(u_PoseSupplier, u_ResetConsumer, u_SpeedSupplier, u_SpeedConsumer, u_PathFollowerConfig, () -> { var alliance = DriverStation.getAlliance(); if (alliance.isPresent()) { return alliance.get() == DriverStation.Alliance.Red; } return false; }, this);
     }
 
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
@@ -66,6 +84,35 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
             updateSimState(deltaTime, RobotController.getBatteryVoltage());
         });
         m_simNotifier.startPeriodic(kSimLoopPeriod);
+    }
+
+    public SwerveModuleState[] getModuleStates() {
+        SwerveModuleState[] states = new SwerveModuleState[4];
+        for (int i = 0; i < 4; i++) {
+            states[i] = this.getModule(i).getCurrentState();
+        }
+        return states;
+    }
+
+    public SwerveModulePosition[] getPositions() {
+        SwerveModulePosition[] positions = new SwerveModulePosition[4];
+        for (int i = 0; i < 4; i++) {
+            positions[i] = this.getModule(i).getPosition(false);
+        }
+        return positions;
+    }
+
+    public void driveRobotRelative(ChassisSpeeds robotRelativeSpeeds) {
+        ChassisSpeeds targetSpeeds = ChassisSpeeds.discretize(robotRelativeSpeeds, 0.02);
+        SwerveModuleState[] targetStates = m_kinematics.toSwerveModuleStates(targetSpeeds);
+        setStates(targetStates);
+    }
+
+    public void setStates(SwerveModuleState[] targetStates) {
+        SwerveDriveKinematics.desaturateWheelSpeeds(targetStates, 4.5);
+        for (int i = 0; i < 4; i++) {
+            this.getModule(i).apply(targetStates[i], DriveRequestType.Velocity);
+        }
     }
 
     public ParentDevice[] requestOrchDevices() {

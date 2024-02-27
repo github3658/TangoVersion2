@@ -1,3 +1,5 @@
+// This file has a list of constants for the swerve drivetrain.
+
 package frc.robot.generated;
 
 import com.ctre.phoenix6.configs.Slot0Configs;

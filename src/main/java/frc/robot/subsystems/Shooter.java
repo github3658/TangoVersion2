@@ -1,23 +1,20 @@
-// TODO: Find and define limits for shooter motors?
 // TODO: Code to calculate motor speed to note distance
 // TODO: Finalize shooter controls with drive team
 
+// This is the shooter subsystem.
+// Currently, it shoots. We'd like for it to move and pivot to shoot at specific angles with accuracy.
+
 package frc.robot.subsystems;
-//import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.ParentDevice;
-//import com.ctre.phoenix6.controls.DutyCycleOut;
-//import com.ctre.phoenix6.controls.PositionVoltage;
-//import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 public class Shooter extends SubsystemBase {
 	/* CONSTANTS (prefix: c) */
-	private final int c_ShootLeftID   = 14; // TODO: Define values for shooter motor IDs
+	private final int c_ShootLeftID   = 14;
 	private final int c_ShootRightID  = 15;
 	private final int c_ShootPivotID  = 16;
 	private final int c_ShootExtendID = 13;

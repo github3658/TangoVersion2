@@ -1,3 +1,6 @@
+// This command is the default shooter command.
+// It currently doesn't do anything as everything the shooter does also requires the Intake.
+
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.XboxController;

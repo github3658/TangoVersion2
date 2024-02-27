@@ -1,6 +1,8 @@
 // TODO: Define limits for lift motor?
 // TODO: Finalize climber controls with drive team
 
+// This is the climber subsystem
+// NOTE: NOT YET WRITTEN
 
 package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;

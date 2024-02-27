@@ -1,3 +1,6 @@
+// This command uses the intake and the shooter to expel notes at a given speed.
+// While this command is running, the intake and the shooter are not controllable.
+
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;

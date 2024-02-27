@@ -1,3 +1,6 @@
+// This command is a wrapper for some orchestra functions.
+// It relieves the other subsystems of their duties to safely play music.
+
 package frc.robot.commands;
 
 import com.ctre.phoenix6.Orchestra;
@@ -17,6 +20,7 @@ public class PlaySong extends Command {
     private final Orchestra o_Orchestra;
     private final String str_song;
     private final GenericHID xb_Operator;
+    private int i_Delay;
 
     public PlaySong(Orchestra orchestra, Swerve swerve, Intake intake, Shooter shooter, String song, GenericHID xbox) {
         o_Orchestra = orchestra;
@@ -30,14 +34,18 @@ public class PlaySong extends Command {
 
     @Override
     public void initialize() {
+        System.out.println("Playing "+str_song+"!");
         o_Orchestra.loadMusic(str_song);
         o_Orchestra.play();
+        i_Delay = 50;
     }
 
     @Override
     public void execute() {
-        if (xb_Operator.getRawButtonPressed(XboxController.Button.kLeftBumper.value)) {
+        i_Delay --;
+        if (i_Delay < 0 && xb_Operator.getRawButton(XboxController.Button.kStart.value)) {
             o_Orchestra.stop();
+            System.out.println("Orchestra finished!");
         }
     }
 

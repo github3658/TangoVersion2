@@ -1,3 +1,5 @@
+// I didn't write this. I think it puts a lot of information in the SmartDashboard. Like, an unreasonable amount of data.
+
 package frc.robot;
 
 import com.ctre.phoenix6.Utils;

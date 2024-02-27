@@ -2,28 +2,26 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
+// This is the primary file. We reference our subsystems here, give them commands, and that's it.
+
 package frc.robot;
 
 import com.ctre.phoenix6.Orchestra;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.hardware.ParentDevice;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
-//import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-//import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-//import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-//import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.generated.TunerConstants;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import com.pathplanner.lib.auto.AutoBuilder;
 import frc.robot.subsystems.*;
 import frc.robot.commands.*;
 
@@ -50,12 +48,14 @@ public class RobotContainer {
 	/* CONTROL BUTTONS (prefix: ctrl) */
 	private JoystickButton ctrl_tempsoot = new JoystickButton(xb_Operator, XboxController.Button.kB.value);
 	private JoystickButton ctrl_AmpShooter = new JoystickButton(xb_Operator, XboxController.Button.kA.value);
-	private JoystickButton ctrl_ZeroIntake = new JoystickButton(xb_Operator, XboxController.Button.kStart.value);
+	// private JoystickButton ctrl_ZeroIntake = new JoystickButton(xb_Operator, XboxController.Button.kStart.value);
 	private JoystickButton ctrl_BohemianRhapsody = new JoystickButton(xb_Operator, XboxController.Button.kLeftStick.value);
 
 	/* OTHER VARIABLES */
 	private final Orchestra o_Orchestra = new Orchestra();
 	private boolean b_Shot = false;
+	private boolean b_PlaySong = true;
+	private SendableChooser<Command> m_AutoChooser;
 
   	//private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
   	//private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
@@ -73,18 +73,10 @@ public class RobotContainer {
 		//ctrl_Shoot.onTrue(new ShootSpeaker(s_Shooter, s_Intake));
 		
 		ctrl_tempsoot.onTrue(com_ShootFull);
-		
-		// if (xb_Operator.getRawAxis(XboxController.Axis.kRightTrigger.value) > 0.9 && !b_Shot) {
-		// 	b_Shot = true;
-		// 	com_ShootFull.schedule();
-		// }
-		// else if (xb_Operator.getRawAxis(XboxController.Axis.kRightTrigger.value) < 0.1 && b_Shot) {
-		// 	b_Shot = false;
-		// }
 
 		SmartDashboard.putBoolean("Shooting", com_ShootFull.isScheduled());
 
-		ctrl_ZeroIntake.whileTrue(new ZeroIntake(s_Intake));
+		//ctrl_ZeroIntake.whileTrue(new ZeroIntake(s_Intake));
 		//ctrl_BohemianRhapsody.onTrue(new PlaySong(o_Orchestra, s_Swerve, s_Intake, s_Shooter, "starwars.chrp", xb_Operator));
 
 		// if (xb_Operator.getRawButton(XboxController.Button.kRightBumper.value)) {
@@ -126,13 +118,57 @@ public class RobotContainer {
 			o_Orchestra.addInstrument(pd);
 		}
     	configureBindings();
+
+		m_AutoChooser = AutoBuilder.buildAutoChooser();
   	}
 
   	public Command getAutonomousCommand() {
     	return Commands.print("No autonomous command configured");
   	}
 
-	//public void teleopPeriodic() {
-	//
-	//}
+	public void autonomousInit() {
+		m_AutoChooser.getSelected().schedule();
+	}
+
+	public void teleopPeriodic() {
+		// Song Selection
+		if (!b_PlaySong && xb_Operator.getRawButton(XboxController.Button.kStart.value)) {
+			if (xb_Operator.getPOV() == 0) {
+				b_PlaySong = true;
+				new PlaySong(o_Orchestra, s_Swerve, s_Intake, s_Shooter, "bohemianrhapsody.chrp", xb_Operator).schedule();
+			}
+			else if (xb_Operator.getPOV() == 45) {
+				b_PlaySong = true;
+				new PlaySong(o_Orchestra, s_Swerve, s_Intake, s_Shooter, "creep.chrp", xb_Operator).schedule();
+			}
+			else if (xb_Operator.getPOV() == 90) {
+				b_PlaySong = true;
+				new PlaySong(o_Orchestra, s_Swerve, s_Intake, s_Shooter, "rickroll.chrp", xb_Operator).schedule();
+			}
+			else if (xb_Operator.getPOV() == 135) {
+				b_PlaySong = true;
+				new PlaySong(o_Orchestra, s_Swerve, s_Intake, s_Shooter, "snitch.chrp", xb_Operator).schedule();
+			}
+			else if (xb_Operator.getPOV() == 180) {
+				b_PlaySong = true;
+				new PlaySong(o_Orchestra, s_Swerve, s_Intake, s_Shooter, "starwars.chrp", xb_Operator).schedule();
+			}
+			else if (xb_Operator.getPOV() == 270) {
+				b_PlaySong = true;
+				new PlaySong(o_Orchestra, s_Swerve, s_Intake, s_Shooter, "metalcrusher.chrp", xb_Operator).schedule();
+			}
+		}
+		else if (xb_Operator.getRawButton(XboxController.Button.kStart.value) == false) {
+			b_PlaySong = false;
+		}
+
+		// Shoot
+		if (xb_Operator.getRawAxis(XboxController.Axis.kRightTrigger.value) > 0.9 && !b_Shot) {
+			b_Shot = true;
+			com_ShootFull.schedule();
+		}
+		else if (xb_Operator.getRawAxis(XboxController.Axis.kRightTrigger.value) < 0.1 && b_Shot) {
+			b_Shot = false;
+		}
+	}
 }
