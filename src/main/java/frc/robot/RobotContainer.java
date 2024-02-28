@@ -8,8 +8,6 @@ package frc.robot;
 
 import com.ctre.phoenix6.Orchestra;
 import com.ctre.phoenix6.hardware.ParentDevice;
-import com.fasterxml.jackson.databind.util.Named;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -17,9 +15,10 @@ import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.generated.TunerConstants;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+
 import frc.robot.subsystems.*;
 import frc.robot.commands.*;
 
@@ -88,8 +87,9 @@ public class RobotContainer {
   	}
 
 	public void autonomousInit() {
-		Command auto = AutoBuilder.buildAuto("!TEST AUTO");
-		auto.addRequirements(s_Swerve);
+		//Command auto = AutoBuilder.buildAuto("!TEST AUTO");
+		Command auto = new PathPlannerAuto("!TEST AUTO");
+		//auto.addRequirements(s_Swerve);
 		auto.schedule();
 		//m_AutoChooser.getSelected().schedule();
 	}

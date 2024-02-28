@@ -38,11 +38,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
-    private final Supplier<Pose2d> u_PoseSupplier = () -> m_odometry.getEstimatedPosition();
-    private final Consumer<Pose2d> u_ResetConsumer = pose -> m_odometry.resetPosition(this.getPigeon2().getRotation2d(), getPositions(), pose);
-    private final Supplier<ChassisSpeeds> u_SpeedSupplier = () -> m_kinematics.toChassisSpeeds(getModuleStates());
-    private final Consumer<ChassisSpeeds> u_SpeedConsumer = relativeSpeeds -> driveRobotRelative(relativeSpeeds);
-    private final HolonomicPathFollowerConfig u_PathFollowerConfig = new HolonomicPathFollowerConfig(new PIDConstants(3,0,0), new PIDConstants(5,0,0.2), 3.0, .350, new ReplanningConfig());//Gage I changed PID constants for kP:100 to 5 and changed driveBaseRadius from 5.43023 to .350
+    private SwerveRequest.ApplyChassisSpeeds m_AutoDriveRequest = new SwerveRequest.ApplyChassisSpeeds();
 
     public Swerve(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency, SwerveModuleConstants... modules) {    
         super(driveTrainConstants, OdometryUpdateFrequency, modules);
@@ -65,7 +61,21 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
             s.getDriveMotor().setNeutralMode(NeutralModeValue.Brake); //Changed into Brake mode
             s.getSteerMotor().setNeutralMode(NeutralModeValue.Brake); //Changed into Brake mode
         }
-        AutoBuilder.configureHolonomic(u_PoseSupplier, u_ResetConsumer, u_SpeedSupplier, u_SpeedConsumer, u_PathFollowerConfig, () -> { var alliance = DriverStation.getAlliance(); if (alliance.isPresent()) { return alliance.get() == DriverStation.Alliance.Red; } return false; }, this);
+        AutoBuilder.configureHolonomic(
+            this::getPose,
+            this::resetPose,
+            this::getCurrentSpeeds,
+            this::driveRobotRelative,
+            new HolonomicPathFollowerConfig(
+                new PIDConstants(0, 0, 0),
+                new PIDConstants(0, 0, 0),
+                3.0,
+                .350,
+                new ReplanningConfig()
+            ),
+            () -> {return false;},
+            this
+        );
     }
 
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
@@ -87,33 +97,33 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         m_simNotifier.startPeriodic(kSimLoopPeriod);
     }
 
-    public SwerveModuleState[] getModuleStates() {
-        SwerveModuleState[] states = new SwerveModuleState[4];
-        for (int i = 0; i < 4; i++) {
-            states[i] = this.getModule(i).getCurrentState();
-        }
-        return states;
+    // Return current robot pose as Pose2d
+    private Pose2d getPose() {
+        return getState().Pose;
     }
 
-    public SwerveModulePosition[] getPositions() {
-        SwerveModulePosition[] positions = new SwerveModulePosition[4];
-        for (int i = 0; i < 4; i++) {
-            positions[i] = this.getModule(i).getPosition(false);
-        }
-        return positions;
+    // Reset robot odometry to Pose2d
+    private void resetPose(Pose2d pose) {
+        // m_odometry.resetPosition(
+        //     pose.getRotation(),
+        //     new SwerveModulePosition[] {
+        //         getModule(0).getPosition(false),
+        //         getModule(1).getPosition(false),
+        //         getModule(2).getPosition(false),
+        //         getModule(3).getPosition(false)
+        //     },
+        //     pose);
+        seedFieldRelative(pose);
     }
 
-    public void driveRobotRelative(ChassisSpeeds robotRelativeSpeeds) {
-        ChassisSpeeds targetSpeeds = ChassisSpeeds.discretize(robotRelativeSpeeds, 0.02);
-        SwerveModuleState[] targetStates = m_kinematics.toSwerveModuleStates(targetSpeeds);
-        setStates(targetStates);
+    // Returns current robot-relative ChassisSpeeds.
+    private ChassisSpeeds getCurrentSpeeds() {
+        return getState().speeds;
     }
 
-    public void setStates(SwerveModuleState[] targetStates) {
-        SwerveDriveKinematics.desaturateWheelSpeeds(targetStates, 4.5);
-        for (int i = 0; i < 4; i++) {
-            this.getModule(i).apply(targetStates[i], DriveRequestType.Velocity);
-        }
+    // Outputs module states using ChassisSpeeds.
+    private void driveRobotRelative(ChassisSpeeds speeds) {
+        setControl(m_AutoDriveRequest.withSpeeds(speeds));
     }
 
     public ParentDevice[] requestOrchDevices() {
