@@ -4,6 +4,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
@@ -41,7 +42,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     private final Consumer<Pose2d> u_ResetConsumer = pose -> m_odometry.resetPosition(this.getPigeon2().getRotation2d(), getPositions(), pose);
     private final Supplier<ChassisSpeeds> u_SpeedSupplier = () -> m_kinematics.toChassisSpeeds(getModuleStates());
     private final Consumer<ChassisSpeeds> u_SpeedConsumer = relativeSpeeds -> driveRobotRelative(relativeSpeeds);
-    private final HolonomicPathFollowerConfig u_PathFollowerConfig = new HolonomicPathFollowerConfig(new PIDConstants(5.0, 0, 0), new PIDConstants(5.0, 0, 0), 4.5, 19.5, new ReplanningConfig());
+    private final HolonomicPathFollowerConfig u_PathFollowerConfig = new HolonomicPathFollowerConfig(new PIDConstants(3,0,0), new PIDConstants(100,0,0.2), 3.0, 5.43023, new ReplanningConfig());
 
     public Swerve(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency, SwerveModuleConstants... modules) {    
         super(driveTrainConstants, OdometryUpdateFrequency, modules);

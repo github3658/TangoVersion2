@@ -3,64 +3,48 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.0,
-        "y": 7.0
+        "x": 1.329669568430046,
+        "y": 5.559932574410603
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.0,
-        "y": 7.0
+        "x": 2.25321541552174,
+        "y": 6.334218486618792
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Speaker Center"
     },
     {
       "anchor": {
-        "x": 4.0,
-        "y": 6.0
+        "x": 3.3633361812178166,
+        "y": 6.352875978479229
       },
       "prevControl": {
-        "x": -0.5781194660980871,
-        "y": 1.7343583982942623
+        "x": 2.7196527120326968,
+        "y": 6.278246011037478
       },
       "nextControl": {
-        "x": 8.578119466098087,
-        "y": 10.265641601705738
+        "x": 3.9559934351072727,
+        "y": 6.42158986298815
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 1.1449341208541577,
-        "y": 3.5409817298507846
+        "x": 5.3503590643544925,
+        "y": 7.630914170919252
       },
       "prevControl": {
-        "x": 1.9272666920191104,
-        "y": 3.5409817298507846
+        "x": 4.3503590643544925,
+        "y": 7.630914170919252
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Taxi Left Wall"
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0.5,
-      "rotationDegrees": 0,
-      "rotateFast": false
-    },
-    {
-      "waypointRelativePos": 1.4,
-      "rotationDegrees": 90.0,
-      "rotateFast": false
-    },
-    {
-      "waypointRelativePos": 0.7,
-      "rotationDegrees": -90.0,
-      "rotateFast": false
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "eventMarkers": [],
   "globalConstraints": {
@@ -71,7 +55,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0,
+    "rotation": 0,
     "rotateFast": false
   },
   "reversed": false,

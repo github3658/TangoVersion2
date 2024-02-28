@@ -1,26 +1,20 @@
 {
   "version": 1.0,
-  "startingPose": {
-    "position": {
-      "x": 1.3533001663498863,
-      "y": 5.565873600441298
-    },
-    "rotation": 0
-  },
+  "startingPose": null,
   "command": {
     "type": "sequential",
     "data": {
       "commands": [
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "ShootAuto"
+            "pathName": "PathPlanner Sanity Test"
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "Basic Test Path"
+            "name": "MetalCrusher"
           }
         }
       ]

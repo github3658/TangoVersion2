@@ -15,7 +15,10 @@ public class IntakeTeleop extends Command {
 
     private GenericHID xb_Operator;
 
-    private final int ctrl_Operator_Intake = XboxController.Button.kA.value;
+    private final int ctrl_IntakeMain = XboxController.Button.kLeftBumper.value;
+    private final int ctrl_Intake = XboxController.Button.kA.value;
+    private final int ctrl_Eject = XboxController.Button.kB.value;
+    private final int ctrl_Stop = XboxController.Button.kY.value;
 
     public IntakeTeleop(Intake subsystem, GenericHID port1) {
         s_Intake = subsystem;
@@ -29,7 +32,7 @@ public class IntakeTeleop extends Command {
 
     @Override
     public void execute() {
-        if (xb_Operator.getRawButton(XboxController.Button.kLeftBumper.value)) {
+        if (xb_Operator.getRawButton(ctrl_IntakeMain)) {
             // Up - Ground State
             if (xb_Operator.getPOV() == 0 && s_Intake.getPivotTarget() != PivotTarget.Ground) {
                 s_Intake.setStateToGround();
@@ -44,15 +47,15 @@ public class IntakeTeleop extends Command {
             }
 
             // A - Force Intake
-            if (xb_Operator.getRawButtonPressed(XboxController.Button.kA.value)) {
+            if (xb_Operator.getRawButtonPressed(ctrl_Intake)) {
                 s_Intake.setIntake(IntakeState.Intake);
             }
             // B - Force Eject
-            if (xb_Operator.getRawButtonPressed(XboxController.Button.kB.value)) {
+            if (xb_Operator.getRawButtonPressed(ctrl_Eject)) {
                 s_Intake.setIntake(IntakeState.FastEject);
             }
             // Y - Force Stop
-            if (xb_Operator.getRawButtonPressed(XboxController.Button.kY.value)) {
+            if (xb_Operator.getRawButtonPressed(ctrl_Stop)) {
                 s_Intake.setIntake(IntakeState.None);
             }
         }

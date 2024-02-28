@@ -7,101 +7,59 @@
 package frc.robot;
 
 import com.ctre.phoenix6.Orchestra;
-import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.hardware.ParentDevice;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import com.fasterxml.jackson.databind.util.Named;
+
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.generated.TunerConstants;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import frc.robot.subsystems.*;
 import frc.robot.commands.*;
 
 public class RobotContainer {
 
 	/* CONSTANTS (prefix: c) */
-	private double c_MaxSwerveSpeed = TunerConstants.kSpeedAt12VoltsMps; // kSpeedAt12VoltsMps desired top speed
-
+	
 	/* SUBSYSTEM DEFINITIONS (prefix: s) */
 	private final Swerve   s_Swerve   = TunerConstants.DriveTrain;
 	private final Shooter  s_Shooter  = new Shooter();
 	private final Intake   s_Intake   = new Intake();
 	//private final Climber  s_Climber  = new Climber();
 
-	private final ShootGeneric com_ShootFull = new ShootGeneric(s_Shooter, s_Intake, 0.6);
-
 	/* INPUT DEVICES (prefix: xb) */
 	private final GenericHID xb_Driver = new GenericHID(0);
 	private final GenericHID xb_Operator = new GenericHID(1);
 
-	/* CONTROL AXES (prefix: axis) */
-	private JoystickButton ctrl_TeleopShoot = new JoystickButton(xb_Operator, XboxController.Axis.kRightTrigger.value);
-
-	/* CONTROL BUTTONS (prefix: ctrl) */
-	private JoystickButton ctrl_tempsoot = new JoystickButton(xb_Operator, XboxController.Button.kB.value);
-	private JoystickButton ctrl_AmpShooter = new JoystickButton(xb_Operator, XboxController.Button.kA.value);
-	// private JoystickButton ctrl_ZeroIntake = new JoystickButton(xb_Operator, XboxController.Button.kStart.value);
-	private JoystickButton ctrl_BohemianRhapsody = new JoystickButton(xb_Operator, XboxController.Button.kLeftStick.value);
+	/* CONTROLS (prefix: ctrl) */
+	private final int ctrl_ShooterMain = XboxController.Button.kRightBumper.value;
+	private final int ctrl_ShooterAmp = XboxController.Button.kA.value;
 
 	/* OTHER VARIABLES */
 	private final Orchestra o_Orchestra = new Orchestra();
 	private boolean b_Shot = false;
 	private boolean b_PlaySong = true;
 	private SendableChooser<Command> m_AutoChooser;
+  	//private final Telemetry logger = new Telemetry(c_MaxSwerveSpeed); This telemetry is a little excessive at the moment, I think it's better to have just the important info in SmartDashboard.
 
-  	//private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-  	//private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
-  	private final Telemetry logger = new Telemetry(c_MaxSwerveSpeed);
-
-  	private void configureBindings() {
+  	private void setDefaultSubsystemCommands() {
 		// These commands contain isolated subsystem behavior
-    	//s_Swerve.setDefaultCommand(new SwerveTeleop(s_Swerve,xb_Driver));
 		s_Swerve.setDefaultCommand(new SwerveTeleop(s_Swerve,	xb_Driver));
 		s_Intake.setDefaultCommand(new IntakeTeleop(s_Intake,	xb_Operator));
 		s_Shooter.setDefaultCommand(new ShooterTeleop(s_Shooter,xb_Operator));
 
-		// These are more complex behaviors that call upon multiple subsystems.
-
-		//ctrl_Shoot.onTrue(new ShootSpeaker(s_Shooter, s_Intake));
-		
-		ctrl_tempsoot.onTrue(com_ShootFull);
-
-		SmartDashboard.putBoolean("Shooting", com_ShootFull.isScheduled());
-
-		//ctrl_ZeroIntake.whileTrue(new ZeroIntake(s_Intake));
-		//ctrl_BohemianRhapsody.onTrue(new PlaySong(o_Orchestra, s_Swerve, s_Intake, s_Shooter, "starwars.chrp", xb_Operator));
-
-		// if (xb_Operator.getRawButton(XboxController.Button.kRightBumper.value)) {
-		// 	ctrl_AmpShooter.onTrue(new ShootGeneric(s_Shooter, s_Intake, 0.10));
-		// }
-
-		// if (xb_Operator.getRawButton(XboxController.Button.kBack.value)) {
-		// 	if (xb_Operator.getPOV() == 0) {
-				
-		// 	}
-		// }
-
-    	//ctrl_Brake.whileTrue(s_Swerve.applyRequest(() -> brake));
-    	//ctrl_Aim.whileTrue(s_Swerve
-        //	.applyRequest(() -> point.withModuleDirection(new Rotation2d(-axis_Forward, -axis_Strafe))));
-
- 	   // reset the field-centric heading on left bumper press
-    	//ctrl_ResetHeading.onTrue(s_Swerve.runOnce(() -> s_Swerve.seedFieldRelative()));
-    	if (Utils.isSimulation()) {
-			s_Swerve.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
-    	}
-    	s_Swerve.registerTelemetry(logger::telemeterize);
-
-		//ctrl_BohemianRhapsody.onTrue(new PlaySong(o_Orchestra, "bohemianrhapsody.chrp"));
+		// More complex behaviors are handled in TeleopPeriodic.
   	}
+
+	private void createNamedCommands() {
+		NamedCommands.registerCommand("MetalCrusher",new PlaySong(o_Orchestra, s_Swerve, s_Intake, s_Shooter, "metalcrusher.chrp", xb_Operator));
+	}
 
   	public RobotContainer() {
 		// Init orchestra
@@ -117,9 +75,12 @@ public class RobotContainer {
 		for (ParentDevice pd : s_Swerve.requestOrchDevices()) {
 			o_Orchestra.addInstrument(pd);
 		}
-    	configureBindings();
+    	setDefaultSubsystemCommands();
+
+		createNamedCommands();
 
 		m_AutoChooser = AutoBuilder.buildAutoChooser();
+		SmartDashboard.putData(m_AutoChooser);
   	}
 
   	public Command getAutonomousCommand() {
@@ -127,7 +88,10 @@ public class RobotContainer {
   	}
 
 	public void autonomousInit() {
-		m_AutoChooser.getSelected().schedule();
+		Command auto = AutoBuilder.buildAuto("!TEST AUTO");
+		auto.addRequirements(s_Swerve);
+		auto.schedule();
+		//m_AutoChooser.getSelected().schedule();
 	}
 
 	public void teleopPeriodic() {
@@ -162,13 +126,20 @@ public class RobotContainer {
 			b_PlaySong = false;
 		}
 
-		// Shoot
+		// Shoot for the Speaker
 		if (xb_Operator.getRawAxis(XboxController.Axis.kRightTrigger.value) > 0.9 && !b_Shot) {
 			b_Shot = true;
-			com_ShootFull.schedule();
+			new ShootGeneric(s_Shooter, s_Intake, 0.60).schedule();
 		}
 		else if (xb_Operator.getRawAxis(XboxController.Axis.kRightTrigger.value) < 0.1 && b_Shot) {
 			b_Shot = false;
+		}
+
+		// Shoot for the Amp
+		if (xb_Operator.getRawButton(ctrl_ShooterMain)) {
+			if (xb_Operator.getRawButtonPressed(ctrl_ShooterAmp)) {
+				new ShootGeneric(s_Shooter, s_Intake, 0.10).schedule();
+			}
 		}
 	}
 }

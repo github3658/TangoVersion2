@@ -47,7 +47,6 @@ public class Intake extends SubsystemBase {
     /* OTHER VARIABLES */
     private double d_IntakeSpeed = 0.0;
     private double d_IntakePivotSpeed = 0.0;
-    private double d_PivotOffset = 0.0;
     private int i_IntakeSwitchDelay = 0;
     private PivotTarget e_PivotTarget = PivotTarget.None;
     private IntakeState e_IntakeState = IntakeState.None;
@@ -61,8 +60,6 @@ public class Intake extends SubsystemBase {
         m_IntakePivot = new TalonFX(c_IntakePivotID, "3658CANivore");
         m_IntakePivot.getConfigurator().apply(new TalonFXConfiguration());
         m_IntakePivot.setNeutralMode(NeutralModeValue.Brake);
-        
-        d_PivotOffset = m_IntakePivot.getPosition().getValueAsDouble();
 
         n_Encoder = new DutyCycleEncoder(8);
         n_NoteDetect = new DigitalInput(9);

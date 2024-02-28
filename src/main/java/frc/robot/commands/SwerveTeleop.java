@@ -5,7 +5,6 @@ package frc.robot.commands;
 
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
-
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -20,6 +19,11 @@ public class SwerveTeleop extends Command {
     private final double c_SwerveRampDeadzone = 0.05;
     private final double c_AccelTime = 50.0;
     private double d_SwerveRamp = 0.0;
+
+    private final int ctrl_Forward = XboxController.Axis.kLeftY.value;
+    private final int ctrl_Strafe = XboxController.Axis.kLeftX.value;
+    private final int ctrl_Rotate = XboxController.Axis.kRightX.value;
+    private final int ctrl_Slow = XboxController.Axis.kLeftTrigger.value;
 
     private GenericHID xb_Driver;
 
@@ -39,9 +43,15 @@ public class SwerveTeleop extends Command {
 
     @Override
     public void execute() {
-        double forward = -Math.pow(xb_Driver.getRawAxis(XboxController.Axis.kLeftY.value),3);
-        double strafe = -Math.pow(xb_Driver.getRawAxis(XboxController.Axis.kLeftX.value),3);
-        double rotate = -Math.pow(xb_Driver.getRawAxis(XboxController.Axis.kRightX.value),3);
+        double forward = -Math.pow(xb_Driver.getRawAxis(ctrl_Forward),3);
+        double strafe = -Math.pow(xb_Driver.getRawAxis(ctrl_Strafe),3);
+        double rotate = -Math.pow(xb_Driver.getRawAxis(ctrl_Rotate),3);
+
+        if (xb_Driver.getRawAxis(ctrl_Slow) > 0.1) {
+            forward /= xb_Driver.getRawAxis(ctrl_Slow)*0.9;
+            strafe /= xb_Driver.getRawAxis(ctrl_Slow)*0.9;
+            rotate /= xb_Driver.getRawAxis(ctrl_Slow)*0.9;
+        }
 
         if (Math.abs(forward) > c_SwerveRampDeadzone || Math.abs(strafe) > c_SwerveRampDeadzone || Math.abs(rotate) > c_SwerveRampDeadzone) {
             d_SwerveRamp = Math.min(d_SwerveRamp+1/c_AccelTime,1);

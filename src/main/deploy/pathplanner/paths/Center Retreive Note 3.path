@@ -3,38 +3,32 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.3533001663498863,
-        "y": 5.551187918118234
+        "x": 1.329669568430046,
+        "y": 5.559932574410603
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.3533001663498907,
-        "y": 5.551187918118234
+        "x": 2.329669568430046,
+        "y": 5.559932574410603
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Speaker Center"
     },
     {
       "anchor": {
-        "x": 5.391862805192518,
-        "y": 6.138615211040799
+        "x": 2.2252291777310824,
+        "y": 4.123305701156857
       },
       "prevControl": {
-        "x": 5.377177122869453,
-        "y": 6.138615211040799
+        "x": 1.2252291777310824,
+        "y": 4.123305701156857
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": null
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0,
-      "rotationDegrees": 0,
-      "rotateFast": false
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "eventMarkers": [],
   "globalConstraints": {
@@ -51,7 +45,7 @@
   "reversed": false,
   "folder": null,
   "previewStartingState": {
-    "rotation": -1.1691393279074012,
+    "rotation": 0,
     "velocity": 0
   },
   "useDefaultConstraints": true

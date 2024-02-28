@@ -1,0 +1,52 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 1.329669568430046,
+        "y": 5.559932574410603
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 1.9173805620338513,
+        "y": 2.5747338767404817
+      },
+      "isLocked": false,
+      "linkedName": "Speaker Center"
+    },
+    {
+      "anchor": {
+        "x": 5.36901655621493,
+        "y": 2.126954072089963
+      },
+      "prevControl": {
+        "x": 4.36901655621493,
+        "y": 2.126954072089963
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Taxi Right Stage"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 0,
+    "rotateFast": false
+  },
+  "reversed": false,
+  "folder": null,
+  "previewStartingState": {
+    "rotation": 0,
+    "velocity": 0
+  },
+  "useDefaultConstraints": true
+}
