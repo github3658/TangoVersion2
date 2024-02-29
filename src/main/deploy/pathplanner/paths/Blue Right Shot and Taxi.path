@@ -8,27 +8,33 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.8400155353098384,
-        "y": 4.664594287670188
+        "x": 2.602628408103792,
+        "y": 2.4929773228466994
       },
       "isLocked": false,
       "linkedName": "Speaker Center"
     },
     {
       "anchor": {
-        "x": 2.197242939940425,
-        "y": 5.559932574410603
+        "x": 4.228906583554568,
+        "y": 1.3146560100949385
       },
       "prevControl": {
-        "x": 1.1972429399404252,
-        "y": 5.559932574410603
+        "x": 3.2289065835545676,
+        "y": 1.3146560100949385
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Taxi Right Wall"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.5,
+      "rotationDegrees": 0,
+      "rotateFast": false
+    }
+  ],
   "constraintZones": [],
   "eventMarkers": [],
   "globalConstraints": {
@@ -45,7 +51,7 @@
   "reversed": false,
   "folder": null,
   "previewStartingState": {
-    "rotation": 0,
+    "rotation": -57.380756928807045,
     "velocity": 0
   },
   "useDefaultConstraints": true
