@@ -30,7 +30,7 @@ public class RobotContainer {
 	private final Swerve   s_Swerve   = TunerConstants.DriveTrain;
 	private final Shooter  s_Shooter  = new Shooter();
 	private final Intake   s_Intake   = new Intake();
-	//private final Climber  s_Climber  = new Climber();
+	private final Climber  s_Climber  = new Climber();
 
 	/* INPUT DEVICES (prefix: xb) */
 	private final GenericHID xb_Driver = new GenericHID(0);
@@ -49,9 +49,10 @@ public class RobotContainer {
 
   	private void setDefaultSubsystemCommands() {
 		// These commands contain isolated subsystem behavior
-		s_Swerve.setDefaultCommand(new SwerveTeleop(s_Swerve,	xb_Driver));
-		s_Intake.setDefaultCommand(new IntakeTeleop(s_Intake,	xb_Operator));
-		s_Shooter.setDefaultCommand(new ShooterTeleop(s_Shooter,xb_Operator));
+		s_Swerve.setDefaultCommand(new SwerveTeleop(s_Swerve,	 xb_Driver));
+		s_Intake.setDefaultCommand(new IntakeTeleop(s_Intake,	 xb_Operator));
+		s_Shooter.setDefaultCommand(new ShooterTeleop(s_Shooter, xb_Operator));
+		s_Climber.setDefaultCommand(new ClimberTeleop(s_Climber, xb_Driver));
 
 		// More complex behaviors are handled in TeleopPeriodic.
   	}
@@ -62,9 +63,9 @@ public class RobotContainer {
 
   	public RobotContainer() {
 		// Init orchestra
-		// for (ParentDevice pd : s_Climber.requestOrchDevices()) {
-		// 	o_Orchestra.addInstrument(pd);
-		// }
+		for (ParentDevice pd : s_Climber.requestOrchDevices()) {
+			o_Orchestra.addInstrument(pd);
+		}
 		for (ParentDevice pd : s_Intake.requestOrchDevices()) {
 			o_Orchestra.addInstrument(pd);
 		}
