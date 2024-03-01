@@ -6,15 +6,15 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "Center Retreive Note 2"
+            "name": "ShootSpeaker"
           }
         },
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "MetalCrusher"
+            "pathName": "Center to Taxi - Left Wall"
           }
         }
       ]
