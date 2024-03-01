@@ -20,7 +20,7 @@ BLINK,
 RAINBOW
 };
 
-private final int canID = 20;
+private final int canID = 11;
 private final int numberOfLEDs = 100;
 private final int[] yellow = {255, 255, 0};
 private final int[] green = {0, 255, 0};
