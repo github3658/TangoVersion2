@@ -19,9 +19,11 @@ import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -73,7 +75,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
                 .350,
                 new ReplanningConfig()
             ),
-            () -> {return false;},
+            () -> {return true;},
             this
         );
     }
@@ -99,21 +101,15 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
 
     // Return current robot pose as Pose2d
     private Pose2d getPose() {
-        return getState().Pose;
+        // AAAAGH THE POSE I'M READING IS BAD SO DO CRAZY MATH TO FIX IT!!!
+        return new Pose2d(getState().Pose.getTranslation(),Rotation2d.fromDegrees(getPigeon2().getYaw().getValue()+90));
+        //return getState().Pose;
     }
 
     // Reset robot odometry to Pose2d
     private void resetPose(Pose2d pose) {
-        // m_odometry.resetPosition(
-        //     pose.getRotation(),
-        //     new SwerveModulePosition[] {
-        //         getModule(0).getPosition(false),
-        //         getModule(1).getPosition(false),
-        //         getModule(2).getPosition(false),
-        //         getModule(3).getPosition(false)
-        //     },
-        //     pose);
-        seedFieldRelative(pose);
+        m_odometry.resetPosition(Rotation2d.fromDegrees(getPigeon2().getYaw().getValue()), getModulePositions(), pose);
+        //seedFieldRelative(pose);
     }
 
     // Returns current robot-relative ChassisSpeeds.
@@ -124,6 +120,18 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     // Outputs module states using ChassisSpeeds.
     private void driveRobotRelative(ChassisSpeeds speeds) {
         setControl(m_AutoDriveRequest.withSpeeds(speeds));
+    }
+
+    private SwerveModulePosition[] getModulePositions() {
+        SwerveModulePosition[] positions = new SwerveModulePosition[4];
+        for (int i = 0; i < 4; i++) {
+            positions[i] = getModule(i).getPosition(false);
+        }
+        return positions;
+    }
+
+    public void zeroHeading() {
+        m_odometry.resetPosition(Rotation2d.fromDegrees(getPigeon2().getYaw().getValue()), getModulePositions(), new Pose2d(getPose().getTranslation(), new Rotation2d()));
     }
 
     public ParentDevice[] requestOrchDevices() {

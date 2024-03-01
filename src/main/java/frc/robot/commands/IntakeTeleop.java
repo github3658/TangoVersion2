@@ -32,7 +32,7 @@ public class IntakeTeleop extends Command {
 
     @Override
     public void execute() {
-        if (xb_Operator.getRawButton(ctrl_IntakeMain)) {
+        //if (xb_Operator.getRawButton(ctrl_IntakeMain)) {
             // Up - Ground State
             if (xb_Operator.getPOV() == 0 && s_Intake.getPivotTarget() != PivotTarget.Ground) {
                 s_Intake.setStateToGround();
@@ -58,16 +58,11 @@ public class IntakeTeleop extends Command {
             if (xb_Operator.getRawButtonPressed(ctrl_Stop)) {
                 s_Intake.setIntake(IntakeState.None);
             }
-        }
+        //}
 
-        // if (xb_Operator.getRawButton(XboxController.Button.kRightBumper.value)) {
-        //     double left = xb_Operator.getRawAxis(XboxController.Axis.kLeftTrigger.value);
-        //     double right = xb_Operator.getRawAxis(XboxController.Axis.kRightTrigger.value);
-        //     s_Intake.overridePivotSpeed((right - left)*0.35);
-        // }
-        // else {
-        //     s_Intake.overridePivotSpeed(0.0);
-        // }
+        if (xb_Operator.getRawButtonPressed(XboxController.Button.kStart.value)) {
+            s_Intake.resetOffset();
+        }
     }
 
     @Override

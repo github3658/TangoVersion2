@@ -3,35 +3,35 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.8400155353098376,
-        "y": 4.664594287670188
+        "x": 0.8246156027195783,
+        "y": 4.684732661057452
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.602628408103792,
-        "y": 2.4929773228466994
+        "x": 1.824615602719585,
+        "y": 4.684732661057452
       },
       "isLocked": false,
-      "linkedName": "Speaker Center"
+      "linkedName": null
     },
     {
       "anchor": {
-        "x": 4.228906583554568,
-        "y": 1.3146560100949385
+        "x": 2.572211799164207,
+        "y": 0.3818277403996678
       },
       "prevControl": {
-        "x": 3.2289065835545676,
-        "y": 1.3146560100949385
+        "x": 1.572211799164207,
+        "y": 0.3818277403996678
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Taxi Right Wall"
+      "linkedName": null
     }
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.5,
-      "rotationDegrees": 0,
+      "waypointRelativePos": 0,
+      "rotationDegrees": -60.0,
       "rotateFast": false
     }
   ],
@@ -51,7 +51,7 @@
   "reversed": false,
   "folder": null,
   "previewStartingState": {
-    "rotation": -57.380756928807045,
+    "rotation": -61.38954033403481,
     "velocity": 0
   },
   "useDefaultConstraints": true

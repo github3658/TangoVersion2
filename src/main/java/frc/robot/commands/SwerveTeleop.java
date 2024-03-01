@@ -23,7 +23,7 @@ public class SwerveTeleop extends Command {
     private final int ctrl_Forward = XboxController.Axis.kLeftY.value;
     private final int ctrl_Strafe = XboxController.Axis.kLeftX.value;
     private final int ctrl_Rotate = XboxController.Axis.kRightX.value;
-    private final int ctrl_Slow = XboxController.Axis.kLeftTrigger.value;
+    private final int ctrl_Slow = XboxController.Button.kA.value;
 
     private GenericHID xb_Driver;
 
@@ -47,10 +47,10 @@ public class SwerveTeleop extends Command {
         double strafe = -Math.pow(xb_Driver.getRawAxis(ctrl_Strafe),3);
         double rotate = -Math.pow(xb_Driver.getRawAxis(ctrl_Rotate),3);
 
-        if (xb_Driver.getRawAxis(ctrl_Slow) > 0.1) {
-            forward /= xb_Driver.getRawAxis(ctrl_Slow)*0.9;
-            strafe /= xb_Driver.getRawAxis(ctrl_Slow)*0.9;
-            rotate /= xb_Driver.getRawAxis(ctrl_Slow)*0.9;
+        if (xb_Driver.getRawButton(ctrl_Slow)) {
+            forward *= 0.1;
+            strafe *= 0.1;
+            rotate *= 0.1;
         }
 
         if (Math.abs(forward) > c_SwerveRampDeadzone || Math.abs(strafe) > c_SwerveRampDeadzone || Math.abs(rotate) > c_SwerveRampDeadzone) {
