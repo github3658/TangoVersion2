@@ -47,6 +47,7 @@ public class Intake extends SubsystemBase {
     /* OTHER VARIABLES */
     private double d_IntakeSpeed = 0.0;
     private double d_IntakePivotSpeed = 0.0;
+    private double d_PivotOffset = 0.0;
     private int i_IntakeSwitchDelay = 0;
     private PivotTarget e_PivotTarget = PivotTarget.None;
     private IntakeState e_IntakeState = IntakeState.None;
@@ -67,8 +68,6 @@ public class Intake extends SubsystemBase {
 
     @Override
     public void periodic() {
-        checkAutoTasks();
-
         // Pivot Control
         double d_PivotAngle = pivotTargetToAngle(e_PivotTarget);
         
@@ -90,6 +89,10 @@ public class Intake extends SubsystemBase {
        
 
         // Pivot control
+        if (getPivotAngle() > 0) {
+            setPivot(PivotTarget.None);
+        }
+
         if (e_PivotTarget != PivotTarget.None) {
             double d_CurrentPivot = getPivotAngle();
             d_IntakePivotSpeed = Math.max(Math.min(((d_PivotAngle - d_CurrentPivot) / 10 * 0.35),0.40),-0.40);
@@ -166,16 +169,16 @@ public class Intake extends SubsystemBase {
     }
 
     public double getPivotAngle() {
-        return (n_Encoder.get()*100)-76.77;
+        return (n_Encoder.get()*100)-76.77-d_PivotOffset;
     }
 
     public boolean intakeHasNote() {
         return !n_NoteDetect.get();
     }
 
-    // public void resetOffset() {
-    //     n_Encoder.reset();
-    // }
+    public void resetOffset() {
+        d_PivotOffset = getPivotAngle();
+    }
 
     public double getPivotCurrent() {
         return m_IntakePivot.getStatorCurrent().getValueAsDouble();

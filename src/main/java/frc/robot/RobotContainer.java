@@ -10,6 +10,10 @@ import com.ctre.phoenix6.Orchestra;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.generated.TunerConstants;
@@ -37,8 +41,8 @@ public class RobotContainer {
 	private final GenericHID xb_Operator = new GenericHID(1);
 
 	/* CONTROLS (prefix: ctrl) */
-	private final int ctrl_ShooterMain = XboxController.Button.kRightBumper.value;
-	private final int ctrl_ShooterAmp = XboxController.Button.kA.value;
+	private final int ctrl_ShooterMain = XboxController.Axis.kRightTrigger.value;
+	private final int ctrl_ShooterAmp = XboxController.Axis.kLeftTrigger.value;
 
 	/* OTHER VARIABLES */
 	private final Orchestra o_Orchestra = new Orchestra();
@@ -59,6 +63,7 @@ public class RobotContainer {
 
 	private void createNamedCommands() {
 		NamedCommands.registerCommand("MetalCrusher",new PlaySong(o_Orchestra, s_Swerve, s_Intake, s_Shooter, "metalcrusher.chrp", xb_Operator));
+		NamedCommands.registerCommand("ShootSpeaker",new ShootGeneric(s_Shooter, s_Intake, 1.0));
 	}
 
   	public RobotContainer() {
@@ -88,59 +93,69 @@ public class RobotContainer {
   	}
 
 	public void autonomousInit() {
-		//Command auto = AutoBuilder.buildAuto("!TEST AUTO");
-		Command auto = new PathPlannerAuto("!TEST AUTO");
-		//auto.addRequirements(s_Swerve);
+		// NetworkTableInstance inst = NetworkTableInstance.getDefault();
+		// NetworkTable nt_db = inst.getTable("DB");
+    	// System.out.println(nt_db.getValue("String 0").getString());
+
+		// Command auto = new PathPlannerAuto("!TEST AUTO");
+		// auto.schedule();
+		SequentialCommandGroup auto = new SequentialCommandGroup(new ShootGeneric(s_Shooter, s_Intake, 0.6), new DriveForwardWorkaround(s_Swerve));
 		auto.schedule();
-		//m_AutoChooser.getSelected().schedule();
 	}
 
 	public void teleopPeriodic() {
+		// Reset FOC
+		if (xb_Driver.getRawButton(XboxController.Button.kLeftStick.value)) {
+			s_Swerve.zeroHeading();
+		}
+
 		// Song Selection
-		if (!b_PlaySong && xb_Operator.getRawButton(XboxController.Button.kStart.value)) {
-			if (xb_Operator.getPOV() == 0) {
+		if (!b_PlaySong && xb_Driver.getRawButton(XboxController.Button.kStart.value)) {
+			if (xb_Driver.getPOV() == 0) {
 				b_PlaySong = true;
-				new PlaySong(o_Orchestra, s_Swerve, s_Intake, s_Shooter, "bohemianrhapsody.chrp", xb_Operator).schedule();
+				new PlaySong(o_Orchestra, s_Swerve, s_Intake, s_Shooter, "bohemianrhapsody.chrp", xb_Driver).schedule();
 			}
-			else if (xb_Operator.getPOV() == 45) {
+			else if (xb_Driver.getPOV() == 45) {
 				b_PlaySong = true;
-				new PlaySong(o_Orchestra, s_Swerve, s_Intake, s_Shooter, "creep.chrp", xb_Operator).schedule();
+				new PlaySong(o_Orchestra, s_Swerve, s_Intake, s_Shooter, "creep.chrp", xb_Driver).schedule();
 			}
-			else if (xb_Operator.getPOV() == 90) {
+			else if (xb_Driver.getPOV() == 90) {
 				b_PlaySong = true;
-				new PlaySong(o_Orchestra, s_Swerve, s_Intake, s_Shooter, "rickroll.chrp", xb_Operator).schedule();
+				new PlaySong(o_Orchestra, s_Swerve, s_Intake, s_Shooter, "rickroll.chrp", xb_Driver).schedule();
 			}
-			else if (xb_Operator.getPOV() == 135) {
+			else if (xb_Driver.getPOV() == 135) {
 				b_PlaySong = true;
-				new PlaySong(o_Orchestra, s_Swerve, s_Intake, s_Shooter, "snitch.chrp", xb_Operator).schedule();
+				new PlaySong(o_Orchestra, s_Swerve, s_Intake, s_Shooter, "snitch.chrp", xb_Driver).schedule();
 			}
-			else if (xb_Operator.getPOV() == 180) {
+			else if (xb_Driver.getPOV() == 180) {
 				b_PlaySong = true;
-				new PlaySong(o_Orchestra, s_Swerve, s_Intake, s_Shooter, "starwars.chrp", xb_Operator).schedule();
+				new PlaySong(o_Orchestra, s_Swerve, s_Intake, s_Shooter, "starwars.chrp", xb_Driver).schedule();
 			}
-			else if (xb_Operator.getPOV() == 270) {
+			else if (xb_Driver.getPOV() == 270) {
 				b_PlaySong = true;
-				new PlaySong(o_Orchestra, s_Swerve, s_Intake, s_Shooter, "metalcrusher.chrp", xb_Operator).schedule();
+				new PlaySong(o_Orchestra, s_Swerve, s_Intake, s_Shooter, "metalcrusher.chrp", xb_Driver).schedule();
 			}
 		}
-		else if (xb_Operator.getRawButton(XboxController.Button.kStart.value) == false) {
+		else if (xb_Driver.getRawButton(XboxController.Button.kStart.value) == false) {
 			b_PlaySong = false;
 		}
 
 		// Shoot for the Speaker
-		if (xb_Operator.getRawAxis(XboxController.Axis.kRightTrigger.value) > 0.9 && !b_Shot) {
+		if (xb_Operator.getRawAxis(ctrl_ShooterMain) > 0.9 && !b_Shot) {
 			b_Shot = true;
 			new ShootGeneric(s_Shooter, s_Intake, 0.60).schedule();
 		}
-		else if (xb_Operator.getRawAxis(XboxController.Axis.kRightTrigger.value) < 0.1 && b_Shot) {
+		else if (xb_Operator.getRawAxis(ctrl_ShooterMain) < 0.1 && b_Shot) {
 			b_Shot = false;
 		}
 
 		// Shoot for the Amp
-		if (xb_Operator.getRawButton(ctrl_ShooterMain)) {
-			if (xb_Operator.getRawButtonPressed(ctrl_ShooterAmp)) {
-				new ShootGeneric(s_Shooter, s_Intake, 0.10).schedule();
-			}
+		if (xb_Operator.getRawAxis(ctrl_ShooterAmp) > 0.9 && !b_Shot) {
+			b_Shot = true;
+			new ShootGeneric(s_Shooter, s_Intake, 0.13).schedule();
+		}
+		else if (xb_Operator.getRawAxis(ctrl_ShooterAmp) < 0.1 && b_Shot) {
+			b_Shot = false;
 		}
 	}
 }
